@@ -1,0 +1,58 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".WirelessActivity" >
+
+    <TextView
+        android:id="@+id/topBSSID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="87dp"
+        android:text="Large Text"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/bssidList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/topBSSID"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="70dp"
+        android:text="@string/hello_world"
+        android:textAlignment="center"
+        android:width="600dp" />
+
+    <TextView
+        android:id="@+id/wirelessTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/topBSSID"
+        android:layout_marginLeft="133dp"
+        android:layout_toRightOf="@+id/bssidList"
+        android:text="TextView" />
+
+    <Button
+        android:id="@+id/symbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/wirelessTime"
+        android:layout_alignTop="@+id/bssidList"
+        android:text="@string/savelist" />
+
+    <TextView
+        android:id="@+id/similarity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/symbutton"
+        android:layout_centerVertical="true"
+        android:width="100dp" />
+
+</RelativeLayout>

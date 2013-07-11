@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SimpleVRController</string>
+    <string name="wireless">Wireless Manager</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="Go_to_VROOM">Go to VROOM</string>
+    <string name="all">All</string>
+    <string name="test">Testing</string>
+    <string name="inflamation">Inflamation</string>
+    <string name="infsym">Inflamation+Symptoms</string>
+    <string name="healthy">All Healthy Patients</string>
+    <string name="top200">Top 200 Species</string>
+    <string name="comparePat">Comparing Patient Types</string>
+    <string name="timeComp">Time Comparison</string>
+    <string name="reconnect">Reconnect</string>
+    <string name="title_activity_wireless">Wireless Manager</string>
+    <string name="savelist">Record</string>
+    <string name="title_activity_gamepad">Gamepad</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="gamepad">Gamepad</string>
+
+</resources>
