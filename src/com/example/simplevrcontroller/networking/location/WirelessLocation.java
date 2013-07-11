@@ -41,6 +41,13 @@ public class WirelessLocation {
 			for(ScanResult res : nets)
 				if(!bssids.contains(res.BSSID))
 					bssids.add(res.BSSID);
+			
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -61,6 +68,15 @@ public class WirelessLocation {
 		}
 		
 		return known / (known + unknown + .0) > thresh.amount_present;
+	}
+	
+	/**
+	 * Checks if the given BSSID is recognized by this WirelessLocation
+	 * @param bssid The BSSID to check
+	 * @return True if it is recognized, false otherwise
+	 */
+	public boolean checkBSSID(String bssid) {
+		return bssids.contains(bssid);
 	}
 	
 	public void save(File f){

@@ -25,7 +25,7 @@ public class WirelessLocator {
 	 */
 	public WirelessLocation getCurrentLocation(){
 		for(WirelessLocation loc : locations.values())
-			if(loc.checkLocation(net, AccuracyThreshold.WEAK))
+			if(loc.checkLocation(net, AccuracyThreshold.AVERAGE))
 				return loc;
 		return null;
 	}
@@ -43,6 +43,15 @@ public class WirelessLocator {
 		locations.put(name, loc);
 		
 		return loc;
+	}
+	
+	/**
+	 * Gets the WirelessLocation that goes by the given name.
+	 * @param name The name of the WirelessLocation
+	 * @return A WirelessLocation if one with the given name exists, or null.
+	 */
+	public WirelessLocation getLocation(String name){
+		return locations.get(name);
 	}
 	
 	public void saveData(){

@@ -56,7 +56,6 @@ public class WirelessActivity extends Activity {
 		private TextView time;
 		private long running;
 		private TextView similarity;
-		private ListComparer<String> comparer;
 		private int threshold;
 		private WirelessLocator locator;
 
@@ -87,14 +86,11 @@ public class WirelessActivity extends Activity {
 				@Override
 				public void onClick(View view) {
 					
-					ArrayList<String> recBSSIDS = new ArrayList<String>();
+					String name = "Test";
+					int num = 0;
+					while(locator.getLocation(name + ++num) != null);
 					
-					for(ScanResult s : networker.getOrderedNetworks(threshold))
-						recBSSIDS.add(s.BSSID);
-					
-					comparer = new ListComparer<String>(recBSSIDS);
-					
-					locator.createNewLocation("Test");
+					locator.createNewLocation(name + num);
 					
 				}
 				
@@ -108,17 +104,18 @@ public class WirelessActivity extends Activity {
 				list.setText("");
 				
 				ArrayList<String> scanBSSIDS = new ArrayList<String>();
+
+				WirelessLocation wl = locator.getCurrentLocation();
 				
 				boolean first = true;
 				for (ScanResult res : all) {
-					scanBSSIDS.add(res.BSSID);
-					
+					scanBSSIDS.add(res.BSSID);					
 					String ssid = res.SSID;
 					Spanned span;
 					
 					String bssid = res.BSSID;
 					
-					if(comparer != null && comparer.getList().contains(bssid)){
+					if(wl != null && wl.checkBSSID(bssid)){
 						bssid = "<font color=\"yellow\">" + bssid + "</font>";
 					}
 					
@@ -144,13 +141,7 @@ public class WirelessActivity extends Activity {
 						list.append(span);
 				}
 				
-				
-				if(comparer != null){
-					
-					WirelessLocation wl = locator.getCurrentLocation();
-					similarity.setText("Difference: " + comparer.compareTo(scanBSSIDS) + ", Location: " + (wl == null ? "<unknown>" : wl.getName()));
-					
-				}
+				similarity.setText("Location: " + (wl == null ? "<unknown>" : wl.getName()));
 				
 				
 				time.setText("Time: " + running / 10);
