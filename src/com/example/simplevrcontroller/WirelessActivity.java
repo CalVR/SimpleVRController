@@ -1,6 +1,7 @@
 package com.example.simplevrcontroller;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -16,7 +17,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.simplevrcontroller.networking.Networker;
+import com.example.simplevrcontroller.networking.NetworkManager;
+import com.example.simplevrcontroller.networking.NetworkManager.AveragedNetworkScanInfo;
 import com.example.simplevrcontroller.networking.location.WirelessLocation;
 import com.example.simplevrcontroller.networking.location.WirelessLocator;
 import com.example.simplevrcontroller.tools.ListComparer;
@@ -31,7 +33,7 @@ public class WirelessActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_wireless);
 
-		Networker networker = new Networker(this);
+		NetworkManager networker = new NetworkManager(this);
 
 		runner = new WirelessRunner(networker, this);
 		
@@ -49,17 +51,17 @@ public class WirelessActivity extends Activity {
 
 	private class WirelessRunner implements Runnable {
 
-		private Networker networker;
+		private NetworkManager networker;
 		private WirelessActivity wa;
 		private TextView top;
 		private TextView list;
 		private TextView time;
 		private long running;
 		private TextView similarity;
-		private int threshold;
 		private WirelessLocator locator;
+		private WirelessLocation old;
 
-		public WirelessRunner(final Networker networker,
+		public WirelessRunner(final NetworkManager networker,
 				WirelessActivity wirelessActivity) {
 			this.networker = networker;
 			this.wa = wirelessActivity;
@@ -67,7 +69,6 @@ public class WirelessActivity extends Activity {
 			locator = new WirelessLocator(networker);
 			
 			running = 0;
-			threshold = -60;
 
 			top = (TextView) wa.findViewById(R.id.topBSSID);
 			top.setTextSize(30);
@@ -100,15 +101,19 @@ public class WirelessActivity extends Activity {
 		@Override
 		public void run() {
 
-				ArrayList<ScanResult> all = networker.getOrderedNetworks(threshold);
+				ArrayList<AveragedNetworkScanInfo> all = networker.getOrderedNetworksAverage(1000, WirelessLocator.WIRELESS_THRESHOLD);
 				list.setText("");
 				
 				ArrayList<String> scanBSSIDS = new ArrayList<String>();
 
-				WirelessLocation wl = locator.getCurrentLocation();
+				List<WirelessLocation> locList = locator.getCurrentLocation();
+				WirelessLocation wl = null;
+				if(!locList.isEmpty())
+					wl = locList.get(0);
 				
 				boolean first = true;
-				for (ScanResult res : all) {
+				for (AveragedNetworkScanInfo net : all) {
+					ScanResult res = net.getScanResult();
 					scanBSSIDS.add(res.BSSID);					
 					String ssid = res.SSID;
 					Spanned span;
@@ -117,7 +122,8 @@ public class WirelessActivity extends Activity {
 					
 					if(wl != null && wl.checkBSSID(bssid)){
 						bssid = "<font color=\"yellow\">" + bssid + "</font>";
-					}
+					} else if(old != null && old.checkBSSID(bssid))
+						bssid = "<font color=\"purple\">" + bssid + "</font>";
 					
 					if(ssid.equals("UCSD-GUEST"))
 						span = Html.fromHtml("<font color=\"green\">" + ssid + "</font>" + " {" + bssid + "} "
@@ -129,7 +135,7 @@ public class WirelessActivity extends Activity {
 						span = Html.fromHtml("<font color=\"blue\">" + ssid + "</font>" + " {" + bssid + "} "
 							+ res.level + "<br>");
 					else {
-						span = Html.fromHtml(ssid + " {" + bssid + "} " + res.level + "<br>");
+						span = Html.fromHtml(ssid + " {" + bssid + "} " + net.getAveragedLevel() + "<br>");
 					}
 					
 					if (first) {
@@ -143,12 +149,18 @@ public class WirelessActivity extends Activity {
 				
 				similarity.setText("Location: " + (wl == null ? "<unknown>" : wl.getName()));
 				
+				for(WirelessLocation l : locList)
+					similarity.append("\n" + l.getName() + " " + l.getStrength());
+				
+				if(wl != null)
+					old = wl;
+				
 				
 				time.setText("Time: " + running / 10);
 				
 				running += 5;
 				
-				handler.postDelayed(runner, 500);
+				handler.postDelayed(runner, 0);
 
 		}
 

@@ -1,17 +1,21 @@
 package com.example.simplevrcontroller.networking.location;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.example.simplevrcontroller.networking.Networker;
+import com.example.simplevrcontroller.networking.NetworkManager;
 import com.example.simplevrcontroller.networking.location.WirelessLocation.AccuracyThreshold;
 
 public class WirelessLocator {
 	
 	private Map<String, WirelessLocation> locations;
-	private Networker net;
+	private NetworkManager net;
 	
-	public WirelessLocator(Networker net){
+	public static final int WIRELESS_THRESHOLD = -70;
+	
+	public WirelessLocator(NetworkManager net){
 		
 		this.net = net;
 		
@@ -23,11 +27,24 @@ public class WirelessLocator {
 	 * Gets the WirelessLocation associated with this spot, or null if it does not match any of them.
 	 * @return A WirelessLocation or null.
 	 */
-	public WirelessLocation getCurrentLocation(){
+	public List<WirelessLocation> getCurrentLocation(){
+		
+		ArrayList<WirelessLocation> locs = new ArrayList<WirelessLocation>();
+		
 		for(WirelessLocation loc : locations.values())
-			if(loc.checkLocation(net, AccuracyThreshold.AVERAGE))
-				return loc;
-		return null;
+			if(loc.checkLocation(net, AccuracyThreshold.STRONG))
+				locs.add(loc);
+		
+		for(WirelessLocation loc : locations.values())
+			if(!locs.contains(loc) && loc.checkLocation(net, AccuracyThreshold.AVERAGE))
+				locs.add(loc);
+		
+		for(WirelessLocation loc : locations.values())
+			if(!locs.contains(loc) && loc.checkLocation(net, AccuracyThreshold.WEAK))
+				locs.add(loc);
+		
+		
+		return locs;
 	}
 	
 	/**
