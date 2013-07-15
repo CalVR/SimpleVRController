@@ -7,8 +7,8 @@ import java.util.TreeMap;
 import android.net.wifi.ScanResult;
 
 import com.example.simplevrcontroller.cave.Cave;
+import com.example.simplevrcontroller.networking.NetworkAverager.AveragedNetworkInfo;
 import com.example.simplevrcontroller.networking.NetworkManager;
-import com.example.simplevrcontroller.networking.NetworkManager.AveragedNetworkScanInfo;
 
 public class WirelessLocation {
 	
@@ -42,8 +42,8 @@ public class WirelessLocation {
 	public void setLocation(NetworkManager networker){
 		bssids.clear();
 		
-		for(int y = 0; y < 20; y++){
-			ArrayList<ScanResult> nets = networker.getOrderedNetworks(WirelessLocator.WIRELESS_THRESHOLD);
+		for(int y = 0; y < 10; y++){
+			ArrayList<ScanResult> nets = networker.getFreshOrderedNetworks(WirelessLocator.WIRELESS_THRESHOLD);
 			
 			for(ScanResult res : nets){
 				if(!bssids.containsKey(res.BSSID))
@@ -52,12 +52,6 @@ public class WirelessLocation {
 					bssids.put(res.BSSID, (res.level + bssids.get(res.BSSID))/2);
 			}
 			
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
 	}
 	
@@ -67,23 +61,23 @@ public class WirelessLocation {
 	 */
 	public boolean checkLocation(NetworkManager networker, AccuracyThreshold thresh){
 		
-		ArrayList<AveragedNetworkScanInfo> nets = networker.getOrderedNetworksAverage(1000, WirelessLocator.WIRELESS_THRESHOLD);
+		ArrayList<AveragedNetworkInfo> nets = networker.getNetworkAverages(WirelessLocator.WIRELESS_THRESHOLD);
 		
 		int dev = 0, cnt = 0;
-		for(AveragedNetworkScanInfo net : nets){
-			Integer i = bssids.get(net.getScanResult().BSSID);
+		for(AveragedNetworkInfo net : nets){
+			Integer i = bssids.get(net.bssid);
 			
 			if(i != null){
-				dev += Math.abs(Math.abs(i) - Math.abs(net.getScanResult().level));
-				
+				dev += Math.abs(Math.abs(i) - Math.abs(net.getAveragedLevel()));
 				
 			} else {
 				dev -= WirelessLocator.WIRELESS_THRESHOLD; 
 			}
+			
 			cnt++;
 			
-			System.out.println(i + "  " + net.getScanResult().level);
-				//dev += i*i - res.level*res.level;
+			//System.out.println(i + "  " + net.getAveragedLevel());
+			//dev += i*i - res.level*res.level;
 			
 		}
 		
