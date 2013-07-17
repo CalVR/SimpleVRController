@@ -15,7 +15,6 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="87dp"
-        android:text="Large Text"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
@@ -36,8 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/topBSSID"
         android:layout_marginLeft="133dp"
-        android:layout_toRightOf="@+id/bssidList"
-        android:text="TextView" />
+        android:layout_toRightOf="@+id/bssidList" />
 
     <Button
         android:id="@+id/symbutton"

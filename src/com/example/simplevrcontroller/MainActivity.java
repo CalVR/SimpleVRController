@@ -1,5 +1,20 @@
 package com.example.simplevrcontroller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
+import org.xml.sax.SAXException;
+
+import com.example.simplevrcontroller.cave.Cave;
+import com.example.simplevrcontroller.cave.CaveManager;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
@@ -29,6 +44,8 @@ public class MainActivity extends Activity {
 	TextView tv;
 	ScrollView tscroll;
 
+	public static final String CAVES = "caves.xml";
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -49,6 +66,18 @@ public class MainActivity extends Activity {
 		tv.setTextSize(12);
 		tv.setWidth(400);
 		tv.setMovementMethod(new ScrollingMovementMethod());
+		
+		//Load caves
+		try {
+			File f = new File(this.getFilesDir(), CAVES);
+			f.createNewFile();
+			CaveManager.getCaveManager().load(new FileInputStream(f));
+		} catch (Exception e) {
+			log("Error loading caves: " + e.getMessage());
+			e.printStackTrace();
+		}
+		
+		CaveManager.getCaveManager().addCave(new Cave("Tester", "137.110.119.227"));
 
 		Spinner spin = (Spinner) this.findViewById(R.id.Hosts);
 		ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this,
@@ -56,6 +85,9 @@ public class MainActivity extends Activity {
 		spinnerAdapter
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spin.setAdapter(spinnerAdapter);
+		
+		
+		
 		spinnerAdapter.add("137.110.119.227");
 		spinnerAdapter.add("VROOMCalVR");
 		spinnerAdapter.add("DWall");
@@ -260,8 +292,22 @@ public class MainActivity extends Activity {
         default:
             return super.onOptionsItemSelected(item);
 		}
+		
 	}
 	
-	
+	@Override
+	public void onPause(){
+		
+		
+		try {
+			File f= new File(this.getFilesDir(), CAVES);
+			f.createNewFile();
+			CaveManager.getCaveManager().save(new FileOutputStream(f));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		super.onPause();
+	}
 
 }

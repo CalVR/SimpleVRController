@@ -1,6 +1,11 @@
 package com.example.simplevrcontroller.cave;
 
-import java.util.Properties;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import com.example.simplevrcontroller.networking.location.WirelessLocation;
 
@@ -15,8 +20,21 @@ public class Cave {
 		this.address = address;
 		this.name = name;
 		
-		Properties prop = new Properties();
 		
+	}
+	
+	public Cave(Node n){
+		name = n.getLocalName();
+		address = n.getNodeValue();
+		
+		Node child = n.getFirstChild();
+		while(child != null){
+			if(child.getLocalName().equals("location")){
+				wl = new WirelessLocation(child);
+				wl.setCave(this);
+			}
+			child = child.getNextSibling();
+		}
 	}
 	
 	public void setWirelessLocation(WirelessLocation wl){
@@ -52,12 +70,31 @@ public class Cave {
 		return name;
 	}
 
-	/**
-	 * Sets the name of this cave.
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
+	public Node getXMLElement() {
+		
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docBuilder = null;
+		try {
+			docBuilder = docFactory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+ 
+		
+		Element root = docBuilder.newDocument().createElement(name);
+		if(wl != null)
+			root.appendChild(wl.getXMLRepresentation());
+		
+		
+		return null;
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(!(o instanceof Cave))
+			return false;
+		
+		return name.equals(((Cave) o).getName());
 	}
 
 }

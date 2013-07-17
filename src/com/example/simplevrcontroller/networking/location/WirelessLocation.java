@@ -1,8 +1,16 @@
 package com.example.simplevrcontroller.networking.location;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.TreeMap;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 import android.net.wifi.ScanResult;
 
@@ -39,6 +47,22 @@ public class WirelessLocation {
 		bssids = new TreeMap<String, Integer>();
 	}
 	
+	public WirelessLocation(Node n) {
+		
+		bssids = new TreeMap<String, Integer>();
+		
+		NamedNodeMap attrs = n.getAttributes();
+		
+		for (int y = 0; y < attrs.getLength(); y++){
+			try {
+				bssids.put(attrs.item(y).getLocalName(), Integer.parseInt(attrs.item(y).getNodeValue()));
+			} catch (NumberFormatException e){
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
 	public void setLocation(NetworkManager networker){
 		bssids.clear();
 		
@@ -71,7 +95,7 @@ public class WirelessLocation {
 				dev += Math.abs(Math.abs(i) - Math.abs(net.getAveragedLevel()));
 				
 			} else {
-				dev -= WirelessLocator.WIRELESS_THRESHOLD; 
+				//dev -= WirelessLocator.WIRELESS_THRESHOLD; 
 			}
 			
 			cnt++;
@@ -100,8 +124,25 @@ public class WirelessLocation {
 		return bssids.containsKey(bssid);
 	}
 	
-	public void save(File f){
+	public Node getXMLRepresentation(){
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory
+				.newInstance();
+		DocumentBuilder docBuilder = null;
+		try {
+			docBuilder = docFactory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		Document doc = docBuilder.newDocument();
+		Element e = doc.createElement("location");
 		
+		for(String s : bssids.keySet()){
+			e.setAttribute(s, bssids.get(s).toString());
+		}
+		
+		return e;
 	}
 
 	public String getName() {

@@ -13,7 +13,7 @@ public class WirelessLocator {
 	private Map<String, WirelessLocation> locations;
 	private NetworkManager net;
 	
-	public static final int WIRELESS_THRESHOLD = -70;
+	public static final int WIRELESS_THRESHOLD = -80;
 	
 	public WirelessLocator(NetworkManager net){
 		
