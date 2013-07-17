@@ -1,25 +1,22 @@
 package com.example.simplevrcontroller.networking.location;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
+import com.example.simplevrcontroller.cave.Cave;
+import com.example.simplevrcontroller.cave.CaveManager;
 import com.example.simplevrcontroller.networking.NetworkManager;
-import com.example.simplevrcontroller.networking.location.WirelessLocation.AccuracyThreshold;
 
 public class WirelessLocator {
 	
-	private Map<String, WirelessLocation> locations;
 	private NetworkManager net;
 	
-	public static final int WIRELESS_THRESHOLD = -80;
+	public static final int WIRELESS_THRESHOLD = -75;
 	
 	public WirelessLocator(NetworkManager net){
 		
 		this.net = net;
-		
-		locations = new TreeMap<String, WirelessLocation>();
 		
 	}
 	
@@ -31,48 +28,22 @@ public class WirelessLocator {
 		
 		ArrayList<WirelessLocation> locs = new ArrayList<WirelessLocation>();
 		
-		for(WirelessLocation loc : locations.values())
-			if(loc.checkLocation(net, AccuracyThreshold.STRONG))
+		for(Cave c : CaveManager.getCaveManager().getCaves()){
+			WirelessLocation loc = c.getWirelessLocation();
+			if(loc.checkLocation(net) != null)
 				locs.add(loc);
+		}
 		
-		for(WirelessLocation loc : locations.values())
-			if(!locs.contains(loc) && loc.checkLocation(net, AccuracyThreshold.AVERAGE))
-				locs.add(loc);
-		
-		for(WirelessLocation loc : locations.values())
-			if(!locs.contains(loc) && loc.checkLocation(net, AccuracyThreshold.WEAK))
-				locs.add(loc);
-		
+		Collections.sort(locs, new Comparator<WirelessLocation>(){
+
+			@Override
+			public int compare(WirelessLocation arg0, WirelessLocation arg1) {
+				return arg0.getLastLocateThreashold().compareTo(arg1.getLastLocateThreashold());
+			}
+			
+		});
 		
 		return locs;
-	}
-	
-	/**
-	 * Creates and stores a new WirelessLocation and sets its location to be the current area.
-	 * @param name Name of the new Location.
-	 * @return The new WirelessLocation
-	 */
-	public WirelessLocation createNewLocation(String name){
-		WirelessLocation loc = new WirelessLocation(name);
-		
-		loc.setLocation(net);
-		
-		locations.put(name, loc);
-		
-		return loc;
-	}
-	
-	/**
-	 * Gets the WirelessLocation that goes by the given name.
-	 * @param name The name of the WirelessLocation
-	 * @return A WirelessLocation if one with the given name exists, or null.
-	 */
-	public WirelessLocation getLocation(String name){
-		return locations.get(name);
-	}
-	
-	public void saveData(){
-		
 	}
 
 }

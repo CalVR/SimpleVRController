@@ -51,6 +51,6 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/symbutton"
         android:layout_centerVertical="true"
-        android:width="100dp" />
+        android:width="150dp" />
 
 </RelativeLayout>

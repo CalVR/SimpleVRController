@@ -3,6 +3,7 @@ package com.example.simplevrcontroller.networking;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import android.net.wifi.ScanResult;
 
@@ -58,7 +59,7 @@ public class NetworkAverager {
 		
 		public final String bssid;
 		public final String ssid;
-		private ArrayList<Integer> nums;
+		private List<Integer> nums;
 		private int store;
 		public boolean just_updated;
 		public int missing_streak;
@@ -68,7 +69,7 @@ public class NetworkAverager {
 			this.bssid = bssid;
 			store = storage;
 			
-			nums = new ArrayList<Integer>();
+			nums = Collections.synchronizedList(new ArrayList<Integer>());
 			
 			just_updated = false;
 			
@@ -98,10 +99,12 @@ public class NetworkAverager {
 			
 			int total = 0;
 			
-			for(Integer i : nums){
-				total += i;
-				//System.out.print(i);
+			synchronized (nums) {
+				for(Integer i : nums){
+					total += i;
+				}
 			}
+				
 			
 			//System.out.println();
 			

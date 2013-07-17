@@ -21,9 +21,9 @@ import com.example.simplevrcontroller.networking.NetworkManager;
 public class WirelessLocation {
 	
 	public enum AccuracyThreshold {
-		STRONG(.90, 5),
-		AVERAGE(.70, 10),
-		WEAK(.50, 20);
+		STRONG(.75, 300),
+		AVERAGE(.60, 600),
+		WEAK(.50, 10000);
 		
 		public final double amount_present;
 		public final int max_deviation;
@@ -40,6 +40,7 @@ public class WirelessLocation {
 	private TreeMap<String, Integer> bssids;
 	private String strength;
 	private Cave cave;
+	private AccuracyThreshold lastLocate;
 
 	public WirelessLocation(String name){
 		this.name = name;
@@ -83,16 +84,18 @@ public class WirelessLocation {
 	 * Returns true if the current location matches this WirelessLocation
 	 * @return
 	 */
-	public boolean checkLocation(NetworkManager networker, AccuracyThreshold thresh){
+	public AccuracyThreshold checkLocation(NetworkManager networker){
 		
 		ArrayList<AveragedNetworkInfo> nets = networker.getNetworkAverages(WirelessLocator.WIRELESS_THRESHOLD);
+		
+		
 		
 		int dev = 0, cnt = 0;
 		for(AveragedNetworkInfo net : nets){
 			Integer i = bssids.get(net.bssid);
-			
+			int av = net.getAveragedLevel();
 			if(i != null){
-				dev += Math.abs(Math.abs(i) - Math.abs(net.getAveragedLevel()));
+				dev += Math.abs(i * i - av * av);
 				
 			} else {
 				//dev -= WirelessLocator.WIRELESS_THRESHOLD; 
@@ -100,19 +103,29 @@ public class WirelessLocation {
 			
 			cnt++;
 			
-			//System.out.println(i + "  " + net.getAveragedLevel());
-			//dev += i*i - res.level*res.level;
-			
 		}
 		
-		dev = Math.abs(dev / cnt);
+		if(cnt <= 0)
+			return null;
 		
-		boolean is_located = dev < thresh.max_deviation;
+		//TODO Test
+		dev = (int) Math.sqrt(dev / cnt);
 		
-		if(is_located)
-			strength = thresh.name() + " " + dev + "      " + thresh.max_deviation;
+		for(AccuracyThreshold acc : AccuracyThreshold.values()){
+			if(dev < acc.max_deviation){
+				strength = acc.name() + " " + dev + "  " + acc.max_deviation;
+				lastLocate = acc;
+				return acc;
+			}
+		}
 		
-		return is_located;
+		lastLocate = null;
+		
+		return null;
+	}
+	
+	public AccuracyThreshold getLastLocateThreashold(){
+		return lastLocate;
 	}
 	
 	/**

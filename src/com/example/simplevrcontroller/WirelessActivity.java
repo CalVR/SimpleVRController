@@ -82,13 +82,7 @@ public class WirelessActivity extends Activity {
 				@Override
 				public void onClick(View view) {
 
-					String name = "Test";
-					int num = 0;
-					while (locator.getLocation(name + ++num) != null)
-						;
-
-					locator.createNewLocation(name + num);
-
+					
 				}
 
 			});
@@ -111,6 +105,7 @@ public class WirelessActivity extends Activity {
 
 			boolean first = true;
 			for (AveragedNetworkInfo net : all) {
+				
 				scanBSSIDS.add(net.bssid);
 				String ssid = net.ssid;
 				Spanned span;

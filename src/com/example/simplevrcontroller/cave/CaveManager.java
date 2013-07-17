@@ -98,6 +98,10 @@ public class CaveManager {
 			n = n.getNextSibling();
 		}
 	}
+	
+	public ArrayList<Cave> getCaves(){
+		return caves;
+	}
 
 	public static CaveManager getCaveManager() {
 		return manager;

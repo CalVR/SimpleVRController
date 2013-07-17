@@ -7,6 +7,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import com.example.simplevrcontroller.networking.NetworkManager;
 import com.example.simplevrcontroller.networking.location.WirelessLocation;
 
 public class Cave {
@@ -20,7 +21,8 @@ public class Cave {
 		this.address = address;
 		this.name = name;
 		
-		
+		wl = new WirelessLocation("location");
+		wl.setCave(this);
 	}
 	
 	public Cave(Node n){
@@ -37,9 +39,8 @@ public class Cave {
 		}
 	}
 	
-	public void setWirelessLocation(WirelessLocation wl){
-		this.wl = wl;
-		wl.setCave(this);
+	public void setWirelessLocation(NetworkManager net){
+		wl.setLocation(net);
 	}
 	
 	public WirelessLocation getWirelessLocation(){
