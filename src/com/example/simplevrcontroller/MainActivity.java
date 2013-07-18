@@ -79,12 +79,14 @@ public class MainActivity extends Activity {
 		}
 		
 		//Add default caves
+		
 		CaveManager.getCaveManager().addCave(new Cave("Tester", "137.110.119.227", 12012));
 		CaveManager.getCaveManager().addCave(new Cave("VROOMCalVR", "VROOMCalVR.calit2.net", 12012));
 		CaveManager.getCaveManager().addCave(new Cave("DWall", "DWall.calit2.net", 12012));
 		CaveManager.getCaveManager().addCave(new Cave("StarCave", "StarCave.calit2.net", 12012));
 		CaveManager.getCaveManager().addCave(new Cave("NEXCave", "NEXCave.calit2.net", 12012));
 		CaveManager.getCaveManager().addCave(new Cave("TourCave", "TourCave.calit2.net", 12012));
+		
 		
 		//Spinner set up
 		spin = (Spinner) this.findViewById(R.id.Hosts);		
@@ -241,7 +243,7 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onClick(View arg0) {
-			Button b = (Button) arg0;
+			//Button b = (Button) arg0;
 
 			if (connected) {
 				try {
@@ -331,6 +333,14 @@ public class MainActivity extends Activity {
 			File f= new File(this.getFilesDir(), CAVES);
 			f.createNewFile();
 			CaveManager.getCaveManager().save(new FileOutputStream(f));
+			
+			String s = "";
+			FileInputStream fis = new FileInputStream(f);
+			while (fis.available() > 0)
+				s = s + (char)fis.read();
+			fis.close();
+			System.out.println(s);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

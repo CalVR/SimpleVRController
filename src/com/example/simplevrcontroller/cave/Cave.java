@@ -1,11 +1,7 @@
 package com.example.simplevrcontroller.cave;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.example.simplevrcontroller.networking.NetworkManager;
 import com.example.simplevrcontroller.networking.location.WirelessLocation;
@@ -27,18 +23,21 @@ public class Cave {
 		wl.setCave(this);
 	}
 	
-	public Cave(Node n){
-		name = n.getLocalName();
-		address = n.getNodeValue();
+	public Cave(Element n){
+		name = n.getAttribute("name");
+		address = n.getAttribute("address");
 		
-		Node child = n.getFirstChild();
-		while(child != null){
-			if(child.getLocalName().equals("location")){
-				wl = new WirelessLocation(child);
-				wl.setCave(this);
-			}
-			child = child.getNextSibling();
+		NodeList elements = n.getElementsByTagName("location");
+		for(int y = 0; y < elements.getLength(); y++ ){
+			wl = new WirelessLocation((Element)elements.item(y));
+			wl.setCave(this);
 		}
+		
+		if(wl == null){
+			wl = new WirelessLocation("location");
+			wl.setCave(this);
+		}
+			
 	}
 	
 	public void setWirelessLocation(NetworkManager net){
@@ -73,23 +72,13 @@ public class Cave {
 		return name;
 	}
 
-	public Node getXMLElement() {
+	public void writeToElement(Element base) {
 		
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder docBuilder = null;
-		try {
-			docBuilder = docFactory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		}
- 
-		
-		Element root = docBuilder.newDocument().createElement(name);
-		if(wl != null)
-			root.appendChild(wl.getXMLRepresentation());
-		
-		
-		return null;
+		base.setAttribute("name", name);
+		base.setAttribute("address", address);
+		Element locEl = base.getOwnerDocument().createElement("location");
+		wl.writeToElement(locEl);
+		base.appendChild(locEl);
 	}
 	
 	@Override

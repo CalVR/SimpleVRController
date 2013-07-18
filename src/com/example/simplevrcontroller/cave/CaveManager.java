@@ -15,7 +15,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class CaveManager {
@@ -67,9 +68,13 @@ public class CaveManager {
 		}
 
 		Document doc = docBuilder.newDocument();
+		Element root = doc.createElement("caves");
+		doc.appendChild(root);
 
 		for (Cave c : caves) {
-			doc.adoptNode(c.getXMLElement());
+			Element ce = doc.createElement("cave");
+			c.writeToElement(ce);
+			root.appendChild(ce);
 		}
 
 		// write the content into xml file
@@ -82,6 +87,8 @@ public class CaveManager {
 		// StreamResult result = new StreamResult(System.out);
 
 		transformer.transform(source, result);
+		
+		System.out.println("Saved data.");
 
 	}
 
@@ -92,10 +99,10 @@ public class CaveManager {
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 		Document doc = docBuilder.parse(is);
 
-		Node n = doc.getFirstChild();
-		while (n != null) {
-			caves.add(new Cave(n));
-			n = n.getNextSibling();
+		Element root = (Element) doc.getFirstChild();
+		NodeList elements = root.getElementsByTagName("cave");
+		for (int y = 0; y < elements.getLength(); y++) {
+			caves.add(new Cave((Element) elements.item(y)));
 		}
 	}
 	

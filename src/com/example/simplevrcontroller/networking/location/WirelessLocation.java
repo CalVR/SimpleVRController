@@ -4,14 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import android.net.wifi.ScanResult;
 
@@ -20,6 +14,8 @@ import com.example.simplevrcontroller.networking.NetworkAverager.AveragedNetwork
 import com.example.simplevrcontroller.networking.NetworkManager;
 
 public class WirelessLocation {
+	
+	public static final char COLON_PLACEHOLDER = '_';
 	
 	public enum AccuracyThreshold {
 		STRONG(.75, 15),
@@ -49,15 +45,16 @@ public class WirelessLocation {
 		bssids = new TreeMap<String, Integer>();
 	}
 	
-	public WirelessLocation(Node n) {
+	public WirelessLocation(Element n) {
 		
 		bssids = new TreeMap<String, Integer>();
 		
-		NamedNodeMap attrs = n.getAttributes();
+		NodeList nets = n.getElementsByTagName("network");
 		
-		for (int y = 0; y < attrs.getLength(); y++){
+		for (int y = 0; y < nets.getLength(); y++){
+			Element net = (Element) nets.item(y);
 			try {
-				bssids.put(attrs.item(y).getLocalName(), Integer.parseInt(attrs.item(y).getNodeValue()));
+				bssids.put(net.getAttribute("bssid"), Integer.parseInt(net.getAttribute("strength")));
 			} catch (NumberFormatException e){
 				e.printStackTrace();
 			}
@@ -112,10 +109,11 @@ public class WirelessLocation {
 		}
 		
 		//TODO Test
-		dev = (int) Math.sqrt(dev / cnt);
+		//dev = (int) Math.sqrt(dev / cnt);
+		dev = (dev / cnt);
 		
 		for(AccuracyThreshold acc : AccuracyThreshold.values()){
-			if(dev < acc.max_deviation){
+			if(dev <= acc.max_deviation){
 				strength = acc.name() + " " + dev + "  " + acc.max_deviation;
 				lastLocate = acc;
 				return acc;
@@ -140,25 +138,15 @@ public class WirelessLocation {
 		return bssids.containsKey(bssid);
 	}
 	
-	public Node getXMLRepresentation(){
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory
-				.newInstance();
-		DocumentBuilder docBuilder = null;
-		try {
-			docBuilder = docFactory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		Document doc = docBuilder.newDocument();
-		Element e = doc.createElement("location");
+	public void writeToElement(Element e) {
 		
 		for(String s : bssids.keySet()){
-			e.setAttribute(s, bssids.get(s).toString());
+			Element a = e.getOwnerDocument().createElement("network");
+			String mod = s.replace(':', COLON_PLACEHOLDER);
+			a.setAttribute("bssid", s);
+			a.setAttribute("strength", bssids.get(s).toString());
+			e.appendChild(a);
 		}
-		
-		return e;
 	}
 
 	public String getName() {
