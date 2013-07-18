@@ -26,6 +26,11 @@ public class Cave {
 	public Cave(Element n){
 		name = n.getAttribute("name");
 		address = n.getAttribute("address");
+		try {
+			port = Integer.parseInt(n.getAttribute("port"));
+		} catch (NumberFormatException e){
+			port = NetworkManager.DEFAULT_CAVE_PORT;
+		}
 		
 		NodeList elements = n.getElementsByTagName("location");
 		for(int y = 0; y < elements.getLength(); y++ ){
@@ -76,6 +81,7 @@ public class Cave {
 		
 		base.setAttribute("name", name);
 		base.setAttribute("address", address);
+		base.setAttribute("port", "" + port);
 		Element locEl = base.getOwnerDocument().createElement("location");
 		wl.writeToElement(locEl);
 		base.appendChild(locEl);

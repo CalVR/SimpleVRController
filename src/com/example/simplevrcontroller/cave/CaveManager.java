@@ -102,7 +102,7 @@ public class CaveManager {
 		Element root = (Element) doc.getFirstChild();
 		NodeList elements = root.getElementsByTagName("cave");
 		for (int y = 0; y < elements.getLength(); y++) {
-			caves.add(new Cave((Element) elements.item(y)));
+			addCave(new Cave((Element) elements.item(y)));
 		}
 	}
 	

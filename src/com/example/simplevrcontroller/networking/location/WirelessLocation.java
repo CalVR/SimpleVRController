@@ -18,9 +18,9 @@ public class WirelessLocation {
 	public static final char COLON_PLACEHOLDER = '_';
 	
 	public enum AccuracyThreshold {
-		STRONG(.75, 15),
-		AVERAGE(.60, 40),
-		WEAK(.50, 10000);
+		STRONG(.75, 300),
+		AVERAGE(.60, 500),
+		WEAK(.50, 1000);
 		
 		public final double amount_present;
 		public final int max_deviation;

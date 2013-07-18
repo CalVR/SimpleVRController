@@ -17,6 +17,8 @@ import android.os.Looper;
 import com.example.simplevrcontroller.networking.NetworkAverager.AveragedNetworkInfo;
 
 public class NetworkManager {
+	
+	public static final int DEFAULT_CAVE_PORT = 12012;
 
 	private WifiManager wm;
 

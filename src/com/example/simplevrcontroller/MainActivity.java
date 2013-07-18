@@ -73,6 +73,7 @@ public class MainActivity extends Activity {
 			File f = new File(this.getFilesDir(), CAVES);
 			f.createNewFile();
 			CaveManager.getCaveManager().load(new FileInputStream(f));
+			
 		} catch (Exception e) {
 			log("Error loading caves: " + e.getMessage());
 			e.printStackTrace();
@@ -136,12 +137,16 @@ public class MainActivity extends Activity {
 				
 				if(locs.size() > 0){
 					WirelessLocation loc = locs.get(0);
-					if(loc.getLastLocateThreashold().equals(AccuracyThreshold.STRONG) || loc.getLastLocateThreashold().equals(AccuracyThreshold.AVERAGE))
+					if(loc.getLastLocateThreashold().equals(AccuracyThreshold.STRONG) || loc.getLastLocateThreashold().equals(AccuracyThreshold.STRONG))
 						for(int y = 0; y < spin.getAdapter().getCount(); y++)
 							if(spin.getAdapter().getItem(y).toString().equals(loc.getCave().getName())){
 								if(!connected){
 									spin.setSelection(y);
 									spin.callOnClick();
+									if(connected){
+										log("seeding");
+										connection.send(0);
+									}
 								}
 								break;
 							}
@@ -331,6 +336,7 @@ public class MainActivity extends Activity {
 		
 		try {
 			File f= new File(this.getFilesDir(), CAVES);
+			f.delete();
 			f.createNewFile();
 			CaveManager.getCaveManager().save(new FileOutputStream(f));
 			
