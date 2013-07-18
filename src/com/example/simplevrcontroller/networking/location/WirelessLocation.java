@@ -1,6 +1,7 @@
 package com.example.simplevrcontroller.networking.location;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -21,8 +22,8 @@ import com.example.simplevrcontroller.networking.NetworkManager;
 public class WirelessLocation {
 	
 	public enum AccuracyThreshold {
-		STRONG(.75, 300),
-		AVERAGE(.60, 600),
+		STRONG(.75, 15),
+		AVERAGE(.60, 40),
 		WEAK(.50, 10000);
 		
 		public final double amount_present;
@@ -67,7 +68,7 @@ public class WirelessLocation {
 	public void setLocation(NetworkManager networker){
 		bssids.clear();
 		
-		for(int y = 0; y < 10; y++){
+		for(int y = 0; y < 20; y++){
 			ArrayList<ScanResult> nets = networker.getFreshOrderedNetworks(WirelessLocator.WIRELESS_THRESHOLD);
 			
 			for(ScanResult res : nets){
@@ -78,6 +79,7 @@ public class WirelessLocation {
 			}
 			
 		}
+		
 	}
 	
 	/**
@@ -86,9 +88,10 @@ public class WirelessLocation {
 	 */
 	public AccuracyThreshold checkLocation(NetworkManager networker){
 		
-		ArrayList<AveragedNetworkInfo> nets = networker.getNetworkAverages(WirelessLocator.WIRELESS_THRESHOLD);
+		if(bssids.size() <= 0)
+			return null;
 		
-		
+		List<AveragedNetworkInfo> nets = networker.getNetworkAverages(WirelessLocator.WIRELESS_THRESHOLD);
 		
 		int dev = 0, cnt = 0;
 		for(AveragedNetworkInfo net : nets){
@@ -104,9 +107,6 @@ public class WirelessLocation {
 			cnt++;
 			
 		}
-		
-		if(cnt <= 0)
-			return null;
 		
 		//TODO Test
 		dev = (int) Math.sqrt(dev / cnt);

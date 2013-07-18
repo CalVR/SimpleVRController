@@ -2,16 +2,7 @@ package com.example.simplevrcontroller;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-
-import org.xml.sax.SAXException;
-
 import com.example.simplevrcontroller.cave.Cave;
 import com.example.simplevrcontroller.cave.CaveManager;
 
@@ -27,7 +18,6 @@ import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -77,7 +67,13 @@ public class MainActivity extends Activity {
 			e.printStackTrace();
 		}
 		
-		CaveManager.getCaveManager().addCave(new Cave("Tester", "137.110.119.227"));
+		CaveManager.getCaveManager().addCave(new Cave("Tester", "137.110.119.227", 12012));
+		CaveManager.getCaveManager().addCave(new Cave("VROOMCalVR", "VROOMCalVR.calit2.net", 12012));
+		CaveManager.getCaveManager().addCave(new Cave("DWall", "DWall.calit2.net", 12012));
+		CaveManager.getCaveManager().addCave(new Cave("StarCave", "StarCave.calit2.net", 12012));
+		CaveManager.getCaveManager().addCave(new Cave("NEXCave", "NEXCave.calit2.net", 12012));
+		CaveManager.getCaveManager().addCave(new Cave("TourCave", "TourCave.calit2.net", 12012));
+		
 
 		Spinner spin = (Spinner) this.findViewById(R.id.Hosts);
 		ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this,
@@ -86,14 +82,9 @@ public class MainActivity extends Activity {
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spin.setAdapter(spinnerAdapter);
 		
+		for(Cave c : CaveManager.getCaveManager().getCaves())
+			spinnerAdapter.add(c.getName());
 		
-		
-		spinnerAdapter.add("137.110.119.227");
-		spinnerAdapter.add("VROOMCalVR");
-		spinnerAdapter.add("DWall");
-		spinnerAdapter.add("StarCave");
-		spinnerAdapter.add("NEXCave");
-		spinnerAdapter.add("TourCave");
 		spinnerAdapter.notifyDataSetChanged();
 		spin.setBackgroundColor(Color.LTGRAY);
 		spin.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -103,17 +94,11 @@ public class MainActivity extends Activity {
 					int pos, long id) {
 				String s = parent.getItemAtPosition(pos).toString();
 
-				try {
-					for (char c : s.replace(".", "").toCharArray())
-						Integer.parseInt("" + c);
+				Cave c = CaveManager.getCaveManager().getCave(s);
 
-				} catch (NumberFormatException e) {
-					s = s + ".calit2.net";
-				}
+				log("Connecting to: " + c.getAddress());
 
-				log("Connecting to: " + s);
-
-				connectToServer(s, 12012);
+				connectToServer(c.getAddress(), c.getPort());
 			}
 
 			@Override

@@ -30,27 +30,34 @@
         android:width="600dp" />
 
     <TextView
-        android:id="@+id/wirelessTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/topBSSID"
-        android:layout_marginLeft="133dp"
-        android:layout_toRightOf="@+id/bssidList" />
-
-    <Button
-        android:id="@+id/symbutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/wirelessTime"
-        android:layout_alignTop="@+id/bssidList"
-        android:text="@string/savelist" />
-
-    <TextView
         android:id="@+id/similarity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/symbutton"
         android:layout_centerVertical="true"
         android:width="150dp" />
+
+    <TextView
+        android:id="@+id/wirelessTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/topBSSID"
+        android:layout_alignParentTop="true" />
+
+    <Button
+        android:id="@+id/symbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/topBSSID"
+        android:layout_marginLeft="71dp"
+        android:layout_toRightOf="@+id/bssidList"
+        android:text="@string/savelist" />
+
+    <Spinner
+        android:id="@+id/caveSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/symbutton"
+        android:layout_alignTop="@+id/bssidList" />
 
 </RelativeLayout>

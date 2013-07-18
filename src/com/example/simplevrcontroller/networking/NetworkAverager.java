@@ -9,12 +9,12 @@ import android.net.wifi.ScanResult;
 
 public class NetworkAverager {
 	
-	public static final int AVERAGE_COUNT = 4;
+	public static final int AVERAGE_COUNT = 5;
 	
-	private ArrayList<AveragedNetworkInfo> networks;
+	private List<AveragedNetworkInfo> networks;
 	
 	public NetworkAverager(){
-		networks = new ArrayList<AveragedNetworkInfo>();
+		networks = Collections.synchronizedList(new ArrayList<AveragedNetworkInfo>());
 	}
 	
 	public void calculateAverages(ArrayList<ScanResult> scans){
@@ -118,7 +118,7 @@ public class NetworkAverager {
 
 	}
 
-	public ArrayList<AveragedNetworkInfo> getAverages() {
+	public List<AveragedNetworkInfo> getAverages() {
 		
 		ArrayList<AveragedNetworkInfo> tmp = new ArrayList<AveragedNetworkInfo>();
 		for(AveragedNetworkInfo inf : networks){

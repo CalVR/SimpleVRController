@@ -15,11 +15,13 @@ public class Cave {
 	private String address;
 	private String name;
 	private WirelessLocation wl;
+	private int port;
 	
-	public Cave(String name, String address){
+	public Cave(String name, String address, int port){
 		
 		this.address = address;
 		this.name = name;
+		this.port = port;
 		
 		wl = new WirelessLocation("location");
 		wl.setCave(this);
@@ -96,6 +98,20 @@ public class Cave {
 			return false;
 		
 		return name.equals(((Cave) o).getName());
+	}
+
+	/**
+	 * @return the port
+	 */
+	public int getPort() {
+		return port;
+	}
+
+	/**
+	 * @param port the port to set
+	 */
+	public void setPort(int port) {
+		this.port = port;
 	}
 
 }

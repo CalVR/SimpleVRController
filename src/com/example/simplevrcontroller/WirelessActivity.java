@@ -5,6 +5,9 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
@@ -13,9 +16,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.example.simplevrcontroller.cave.Cave;
+import com.example.simplevrcontroller.cave.CaveManager;
 import com.example.simplevrcontroller.networking.NetworkAverager.AveragedNetworkInfo;
 import com.example.simplevrcontroller.networking.NetworkManager;
 import com.example.simplevrcontroller.networking.location.WirelessLocation;
@@ -27,6 +35,7 @@ public class WirelessActivity extends Activity {
 	private Handler handler;
 	private NetworkManager networker;
 	private long start_time;
+	private String currentCave;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +49,32 @@ public class WirelessActivity extends Activity {
 		handler = new Handler();
 
 		this.getActionBar().setHomeButtonEnabled(true);
+		
+		Spinner spin = (Spinner) this.findViewById(R.id.caveSpinner);
+		ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_spinner_item, android.R.id.text1);
+		spinnerAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spin.setAdapter(spinnerAdapter);
+		
+		for(Cave c : CaveManager.getCaveManager().getCaves())
+			spinnerAdapter.add(c.getName());
+		
+		spinnerAdapter.notifyDataSetChanged();
+		spin.setBackgroundColor(Color.LTGRAY);
+		spin.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int pos, long id) {
+				currentCave = parent.getItemAtPosition(pos).toString();
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+
+		});
 	}
 
 	@Override
@@ -81,7 +116,32 @@ public class WirelessActivity extends Activity {
 
 				@Override
 				public void onClick(View view) {
+					
+					AsyncTask.execute(new Runnable(){
 
+						@Override
+						public void run() {
+							CaveManager.getCaveManager().getCave(currentCave).getWirelessLocation().setLocation(networker);
+							
+							try {
+								
+								MediaPlayer mp = MediaPlayer.create(WirelessActivity.this, R.raw.beep1);
+					            mp.setOnCompletionListener(new android.media.MediaPlayer.OnCompletionListener() {
+
+					                @Override
+					                public void onCompletion(MediaPlayer mp) {
+					                    // TODO Auto-generated method stub
+					                    mp.release();
+					                }
+
+					            });   
+					            mp.start();
+								
+							} catch (Exception e) {
+							}
+						}
+						
+					});
 					
 				}
 
@@ -92,7 +152,7 @@ public class WirelessActivity extends Activity {
 		public void run() {
 			
 
-			ArrayList<AveragedNetworkInfo> all = networker
+			List<AveragedNetworkInfo> all = networker
 					.getNetworkAverages(WirelessLocator.WIRELESS_THRESHOLD);
 			list.setText("");
 
@@ -144,10 +204,10 @@ public class WirelessActivity extends Activity {
 			}
 
 			similarity.setText("Location: "
-					+ (wl == null ? "<unknown>" : wl.getName()));
+					+ (wl == null ? "<unknown>" : wl.getCave().getName()));
 
 			for (WirelessLocation l : locList)
-				similarity.append("\n" + l.getName() + " " + l.getStrength());
+				similarity.append("\n" + l.getCave().getName() + " " + l.getStrength());
 
 			if (wl != null)
 				old = wl;

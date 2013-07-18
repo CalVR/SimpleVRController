@@ -8,9 +8,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -72,16 +69,17 @@ public class NetworkManager {
 		
 	}
 	
-	public ArrayList<AveragedNetworkInfo> getNetworkAverages(){
+	public List<AveragedNetworkInfo> getNetworkAverages(){
 		return averager.getAverages();
 	}
 
-	public ArrayList<AveragedNetworkInfo> getNetworkAverages(int thresh) {
-
-		ArrayList<AveragedNetworkInfo> newList = new ArrayList<AveragedNetworkInfo>();
-		for (AveragedNetworkInfo s : getNetworkAverages())
+	public List<AveragedNetworkInfo> getNetworkAverages(int thresh) {
+		
+		List<AveragedNetworkInfo> newList = new ArrayList<AveragedNetworkInfo>(), av = getNetworkAverages();
+		for (AveragedNetworkInfo s : av)
 			if (s.getAveragedLevel() >= thresh)
 				newList.add(s);
+			
 
 		return newList;
 
