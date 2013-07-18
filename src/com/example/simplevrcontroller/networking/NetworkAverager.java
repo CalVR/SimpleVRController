@@ -11,10 +11,10 @@ public class NetworkAverager {
 	
 	public static final int AVERAGE_COUNT = 5;
 	
-	private List<AveragedNetworkInfo> networks;
+	private ArrayList<AveragedNetworkInfo> networks;
 	
 	public NetworkAverager(){
-		networks = Collections.synchronizedList(new ArrayList<AveragedNetworkInfo>());
+		networks = new ArrayList<AveragedNetworkInfo>();
 	}
 	
 	public void calculateAverages(ArrayList<ScanResult> scans){
@@ -53,6 +53,14 @@ public class NetworkAverager {
 			}
 			
 		});
+		
+		ArrayList<AveragedNetworkInfo> tmp = new ArrayList<AveragedNetworkInfo>();
+		for(AveragedNetworkInfo inf : networks){
+			if((inf.missing_streak + inf.missing_streak) > AVERAGE_COUNT)
+				tmp.add(inf);
+		}
+		
+		networks.removeAll(tmp);
 	}
 	
 	public class AveragedNetworkInfo implements Comparable<AveragedNetworkInfo> {
@@ -119,16 +127,7 @@ public class NetworkAverager {
 	}
 
 	public List<AveragedNetworkInfo> getAverages() {
-		
-		ArrayList<AveragedNetworkInfo> tmp = new ArrayList<AveragedNetworkInfo>();
-		for(AveragedNetworkInfo inf : networks){
-			if((inf.missing_streak + inf.missing_streak) > AVERAGE_COUNT)
-				tmp.add(inf);
-		}
-		
-		networks.removeAll(tmp);
-		
-		return networks;
+		return (List<AveragedNetworkInfo>) networks.clone();
 	}
 
 }

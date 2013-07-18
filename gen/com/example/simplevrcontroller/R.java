@@ -50,7 +50,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int buttonINF=0x7f0a0005;
         public static final int buttonINFSYM=0x7f0a0007;
         public static final int buttonTOGGLE=0x7f0a0008;
-        public static final int caveSpinner=0x7f0a0017;
+        public static final int caveSpinner=0x7f0a0016;
         public static final int connect=0x7f0a0010;
         public static final int dummy_button=0x7f0a0002;
         public static final int fullscreen_content=0x7f0a0000;
@@ -63,7 +63,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int tester=0x7f0a0011;
         public static final int topBSSID=0x7f0a0012;
         public static final int tscroller=0x7f0a000e;
-        public static final int wirelessTime=0x7f0a0016;
+        public static final int wirelessTime=0x7f0a0017;
         public static final int wirelessitem=0x7f0a0018;
     }
     public static final class layout {

@@ -93,6 +93,9 @@ public class WirelessLocation {
 		
 		List<AveragedNetworkInfo> nets = networker.getNetworkAverages(WirelessLocator.WIRELESS_THRESHOLD);
 		
+		if(nets.size() <= 0)
+			return null;
+		
 		int dev = 0, cnt = 0;
 		for(AveragedNetworkInfo net : nets){
 			Integer i = bssids.get(net.bssid);

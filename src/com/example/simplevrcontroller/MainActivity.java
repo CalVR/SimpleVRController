@@ -3,8 +3,14 @@ package com.example.simplevrcontroller;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.List;
+
 import com.example.simplevrcontroller.cave.Cave;
 import com.example.simplevrcontroller.cave.CaveManager;
+import com.example.simplevrcontroller.networking.NetworkManager;
+import com.example.simplevrcontroller.networking.location.WirelessLocation;
+import com.example.simplevrcontroller.networking.location.WirelessLocation.AccuracyThreshold;
+import com.example.simplevrcontroller.networking.location.WirelessLocator;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -15,6 +21,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,9 +37,13 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
 	private Connection connection;
-	boolean connected;
-	TextView tv;
-	ScrollView tscroll;
+	private boolean connected;
+	private TextView tv;
+	private ScrollView tscroll;
+	private WirelessLocator locator;
+	private Handler h;
+	private Spinner spin;
+	private NetworkManager networker;
 
 	public static final String CAVES = "caves.xml";
 
@@ -67,6 +78,7 @@ public class MainActivity extends Activity {
 			e.printStackTrace();
 		}
 		
+		//Add default caves
 		CaveManager.getCaveManager().addCave(new Cave("Tester", "137.110.119.227", 12012));
 		CaveManager.getCaveManager().addCave(new Cave("VROOMCalVR", "VROOMCalVR.calit2.net", 12012));
 		CaveManager.getCaveManager().addCave(new Cave("DWall", "DWall.calit2.net", 12012));
@@ -74,8 +86,8 @@ public class MainActivity extends Activity {
 		CaveManager.getCaveManager().addCave(new Cave("NEXCave", "NEXCave.calit2.net", 12012));
 		CaveManager.getCaveManager().addCave(new Cave("TourCave", "TourCave.calit2.net", 12012));
 		
-
-		Spinner spin = (Spinner) this.findViewById(R.id.Hosts);
+		//Spinner set up
+		spin = (Spinner) this.findViewById(R.id.Hosts);		
 		ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this,
 				android.R.layout.simple_spinner_item, android.R.id.text1);
 		spinnerAdapter
@@ -107,6 +119,36 @@ public class MainActivity extends Activity {
 				
 			}
 
+		});
+		
+		//Set up location handling
+		locator = new WirelessLocator(networker = new NetworkManager(this));
+		
+		h = new Handler();
+		h.post(new Runnable(){
+
+			@Override
+			public void run() {
+				
+				List<WirelessLocation> locs = locator.getCurrentLocation();
+				
+				if(locs.size() > 0){
+					WirelessLocation loc = locs.get(0);
+					if(loc.getLastLocateThreashold().equals(AccuracyThreshold.STRONG) || loc.getLastLocateThreashold().equals(AccuracyThreshold.AVERAGE))
+						for(int y = 0; y < spin.getAdapter().getCount(); y++)
+							if(spin.getAdapter().getItem(y).toString().equals(loc.getCave().getName())){
+								if(!connected){
+									spin.setSelection(y);
+									spin.callOnClick();
+								}
+								break;
+							}
+				}
+				
+				h.postDelayed(this, 1000);
+				
+			}
+			
 		});
 		
 		Button recon = ((Button) this.findViewById(R.id.connect));
@@ -283,6 +325,7 @@ public class MainActivity extends Activity {
 	@Override
 	public void onPause(){
 		
+		networker.pause();
 		
 		try {
 			File f= new File(this.getFilesDir(), CAVES);
@@ -293,6 +336,14 @@ public class MainActivity extends Activity {
 		}
 		
 		super.onPause();
+	}
+	
+	@Override
+	public void onResume(){
+
+		networker.resume();
+		
+		super.onResume();
 	}
 
 }

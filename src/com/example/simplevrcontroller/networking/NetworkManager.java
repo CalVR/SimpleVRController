@@ -76,6 +76,7 @@ public class NetworkManager {
 	public List<AveragedNetworkInfo> getNetworkAverages(int thresh) {
 		
 		List<AveragedNetworkInfo> newList = new ArrayList<AveragedNetworkInfo>(), av = getNetworkAverages();
+		
 		for (AveragedNetworkInfo s : av)
 			if (s.getAveragedLevel() >= thresh)
 				newList.add(s);
