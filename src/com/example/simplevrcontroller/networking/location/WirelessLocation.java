@@ -99,12 +99,12 @@ public class WirelessLocation {
 			int av = net.getAveragedLevel();
 			if(i != null){
 				dev += Math.abs(i * i - av * av);
-				
+				cnt++;
 			} else {
 				//dev -= WirelessLocator.WIRELESS_THRESHOLD; 
 			}
 			
-			cnt++;
+			
 			
 		}
 		

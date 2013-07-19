@@ -234,9 +234,6 @@ public class MainActivity extends Activity {
 		
 		if(server != null){
 			
-			if(connection != null)
-				connection.close();
-			
 			connection = new Connection(server, port);
 		}
 		
