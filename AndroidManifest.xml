@@ -38,6 +38,10 @@
             android:label="@string/title_activity_gamepad"
             android:theme="@style/FullscreenTheme" >
         </activity>
+        <activity
+            android:name="com.example.simplevrcontroller.Gamepad"
+            android:label="@string/title_activity_gamepad">
+        </activity>
     </application>
 
 </manifest>

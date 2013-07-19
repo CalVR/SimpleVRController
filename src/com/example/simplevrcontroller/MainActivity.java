@@ -208,6 +208,10 @@ public class MainActivity extends Activity {
 		bAll.setOnClickListener(listener);
 		bAll.setOnLongClickListener(listener);
 		
+		
+		
+		
+		
 	}
 	
 	public Cave getCurrentCave(){
@@ -246,7 +250,7 @@ public class MainActivity extends Activity {
 			Exception e = new ConnectionInitializer().execute(connection).get();
 			if (e != null)
 				throw e;
-
+			
 			connected = true;
 			tv.setTextColor(Color.BLACK);
 			log("Connected!");
@@ -351,7 +355,7 @@ public class MainActivity extends Activity {
 		
 		if(item.getTitle().equals("Gamepad")){
 			
-			Intent intent = new Intent(this, GamepadActivity.class);
+			Intent intent = new Intent(this, Gamepad.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
 			

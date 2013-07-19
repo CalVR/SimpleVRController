@@ -7,8 +7,8 @@
     <string name="Go_to_VROOM">Go to VROOM</string>
     <string name="all">All</string>
     <string name="test">Testing</string>
-    <string name="inflamation">Inflamation</string>
-    <string name="infsym">Inflamation+Symptoms</string>
+    <string name="inflamation">Inflammation</string>
+    <string name="infsym">Inflammation+Symptoms</string>
     <string name="healthy">All Healthy Patients</string>
     <string name="top200">Top 200 Species</string>
     <string name="comparePat">Comparing Patient Types</string>
@@ -20,5 +20,16 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="gamepad">Gamepad</string>
+    
+    <string name="sensor">Mode: None</string> 
+    <string name="ip">Select IP</string>
+    <string name="velocity">Velocity: 0.000</string>
+    <string name="accel">Accel: 0, 0, 0</string>
+    <string name="ipPrompt">Select IP:</string>
+    <string-array name="hosts_array">
+    </string-array>
+    <string name="nodePrompt">Select Node:</string>
+    <string-array name="nodes_array">
+    </string-array>
 
 </resources>

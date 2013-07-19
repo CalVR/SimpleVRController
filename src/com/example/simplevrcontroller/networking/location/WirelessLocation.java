@@ -108,19 +108,24 @@ public class WirelessLocation {
 			
 		}
 		
+		lastLocate = null;
+		
+		if(cnt <= 0)
+			return null;
+		
 		//TODO Test
 		//dev = (int) Math.sqrt(dev / cnt);
 		dev = (dev / cnt);
 		
 		for(AccuracyThreshold acc : AccuracyThreshold.values()){
-			if(dev <= acc.max_deviation){
+			if(dev <= acc.max_deviation && (double)cnt / bssids.size() > .50){
 				strength = acc.name() + " " + dev + "  " + acc.max_deviation;
 				lastLocate = acc;
 				return acc;
 			}
 		}
 		
-		lastLocate = null;
+		
 		
 		return null;
 	}
