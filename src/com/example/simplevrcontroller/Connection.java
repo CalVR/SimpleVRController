@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class Connection {
 	
@@ -61,7 +62,7 @@ public class Connection {
 					for(byte b : reverse)
 						tmp = tmp + b;
 					
-					System.out.println("Sending " + num + " as " + tmp);
+					Log.d("Connection",	"Sending " + num + " as " + tmp);
 					
 					sock.getOutputStream().write(reverse);
 					
