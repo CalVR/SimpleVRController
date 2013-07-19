@@ -20,7 +20,11 @@ public class Connection {
 	}
 	
 	public void init() throws UnknownHostException, IOException{
-		this.sock = new Socket(server, port);
+		
+		if(sock != null)
+			sock.close();
+		
+		sock = new Socket(server, port);
 	}
 	
 	public int send(int num){
@@ -69,6 +73,15 @@ public class Connection {
 			return null;
 		}
     	
+    }
+    
+    public void close(){
+    	try {
+			sock.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
 }

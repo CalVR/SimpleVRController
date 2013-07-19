@@ -27,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -81,12 +82,12 @@ public class MainActivity extends Activity {
 		
 		//Add default caves
 		
-		CaveManager.getCaveManager().addCave(new Cave("Tester", "137.110.119.227", 12012));
-		CaveManager.getCaveManager().addCave(new Cave("VROOMCalVR", "VROOMCalVR.calit2.net", 12012));
-		CaveManager.getCaveManager().addCave(new Cave("DWall", "DWall.calit2.net", 12012));
-		CaveManager.getCaveManager().addCave(new Cave("StarCave", "StarCave.calit2.net", 12012));
-		CaveManager.getCaveManager().addCave(new Cave("NEXCave", "NEXCave.calit2.net", 12012));
-		CaveManager.getCaveManager().addCave(new Cave("TourCave", "TourCave.calit2.net", 12012));
+		CaveManager.getCaveManager().addCave(new Cave("Tester", "137.110.119.227", 12012, 0));
+		CaveManager.getCaveManager().addCave(new Cave("VROOMCalVR", "VROOMCalVR.calit2.net", 12012, -1));
+		CaveManager.getCaveManager().addCave(new Cave("DWall", "DWall.calit2.net", 12012, -1));
+		CaveManager.getCaveManager().addCave(new Cave("StarCave", "StarCave.calit2.net", 12012, -1));
+		CaveManager.getCaveManager().addCave(new Cave("NEXCave", "NEXCave.calit2.net", 12012, -1));
+		CaveManager.getCaveManager().addCave(new Cave("TourCave", "TourCave.calit2.net", 12012, -1));
 		
 		
 		//Spinner set up
@@ -143,10 +144,6 @@ public class MainActivity extends Activity {
 								if(!connected){
 									spin.setSelection(y);
 									spin.callOnClick();
-									if(connected){
-										log("seeding");
-										connection.send(0);
-									}
 								}
 								break;
 							}
@@ -170,31 +167,51 @@ public class MainActivity extends Activity {
 			
 		});
 		
+		BListener listener = new BListener(0);
 		Button bAll = ((Button) this.findViewById(R.id.buttonALL));
-		bAll.setOnClickListener(new BListener(0));
-
-		bAll = ((Button) this.findViewById(R.id.ButtonCOMP));
-		bAll.setOnClickListener(new BListener(4));
-
-		bAll = ((Button) this.findViewById(R.id.buttonHEALTHY));
-		bAll.setOnClickListener(new BListener(6));
-
-		bAll = ((Button) this.findViewById(R.id.buttonINF));
-		bAll.setOnClickListener(new BListener(1));
-
-		bAll = ((Button) this.findViewById(R.id.buttonINFSYM));
-		bAll.setOnClickListener(new BListener(2));
-
-		bAll = ((Button) this.findViewById(R.id.ButtonTIME));
-		bAll.setOnClickListener(new BListener(3));
-
-		// Wrong
-		bAll = ((Button) this.findViewById(R.id.buttonTOGGLE));
-		bAll.setOnClickListener(new BListener(7));
-
-		bAll = ((Button) this.findViewById(R.id.ButtonTOP200));
-		bAll.setOnClickListener(new BListener(5));
+		bAll.setOnClickListener(listener);
+		bAll.setOnLongClickListener(listener);
 		
+		listener = new BListener(4);
+		bAll = ((Button) this.findViewById(R.id.ButtonCOMP));
+		bAll.setOnClickListener(listener);
+		bAll.setOnLongClickListener(listener);
+		
+		listener = new BListener(6);
+		bAll = ((Button) this.findViewById(R.id.buttonHEALTHY));
+		bAll.setOnClickListener(listener);
+		bAll.setOnLongClickListener(listener);
+		
+		listener = new BListener(1);
+		bAll = ((Button) this.findViewById(R.id.buttonINF));
+		bAll.setOnClickListener(listener);
+		bAll.setOnLongClickListener(listener);
+		
+		listener = new BListener(2);
+		bAll = ((Button) this.findViewById(R.id.buttonINFSYM));
+		bAll.setOnClickListener(listener);
+		bAll.setOnLongClickListener(listener);
+		
+		listener = new BListener(3);
+		bAll = ((Button) this.findViewById(R.id.ButtonTIME));
+		bAll.setOnClickListener(listener);
+		bAll.setOnLongClickListener(listener);
+		
+		// Wrong
+		listener = new BListener(7);
+		bAll = ((Button) this.findViewById(R.id.buttonTOGGLE));
+		bAll.setOnClickListener(listener);
+		bAll.setOnLongClickListener(listener);
+		
+		listener = new BListener(5);
+		bAll = ((Button) this.findViewById(R.id.ButtonTOP200));
+		bAll.setOnClickListener(listener);
+		bAll.setOnLongClickListener(listener);
+		
+	}
+	
+	public Cave getCurrentCave(){
+		return CaveManager.getCaveManager().getCave(spin.getSelectedItem().toString());
 	}
 
 	@Override
@@ -203,10 +220,25 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-
+	
+	/**
+	 * Connects to the given server, or reconnects to the old one 
+	 * if no new server address is given.
+	 * @param server The server to connect to
+	 * @param port The port to connect on
+	 * @return True if it succeeded, false otherwise.
+	 */
 	public boolean connectToServer(String server, int port) {
-		if(server != null)
+		
+		
+		
+		if(server != null){
+			
+			if(connection != null)
+				connection.close();
+			
 			connection = new Connection(server, port);
+		}
 		
 		if(connection == null){
 			System.out.println("Connection not created!");
@@ -221,6 +253,11 @@ public class MainActivity extends Activity {
 			connected = true;
 			tv.setTextColor(Color.BLACK);
 			log("Connected!");
+			int def = getCurrentCave().getDefaultPreset();
+			if(def != -1){
+				log("Sending default: " + def);
+				connection.send(def);
+			}
 
 		} catch (Exception e1) {
 			// e1.printStackTrace();
@@ -238,7 +275,7 @@ public class MainActivity extends Activity {
 		tscroll.fullScroll(View.FOCUS_DOWN);
 	}
 
-	private class BListener implements OnClickListener {
+	private class BListener implements OnClickListener, OnLongClickListener {
 
 		private int num;
 
@@ -277,6 +314,13 @@ public class MainActivity extends Activity {
 			}
 		}
 
+		@Override
+		public boolean onLongClick(View arg0) {
+			getCurrentCave().setDefaultPreset(num);
+			log("Set default preset for " + getCurrentCave().getName() + " to " + num);
+			return true;
+		}
+
 	}
 
 	private class ConnectionInitializer extends
@@ -287,6 +331,7 @@ public class MainActivity extends Activity {
 			for (Connection c : arg0)
 				try {
 					c.init();
+					
 				} catch (Exception e) {
 					return e;
 				}
