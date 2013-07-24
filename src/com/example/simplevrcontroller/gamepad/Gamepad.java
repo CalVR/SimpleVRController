@@ -1,4 +1,4 @@
-package com.example.simplevrcontroller;
+package com.example.simplevrcontroller.gamepad;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -12,6 +12,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.example.simplevrcontroller.MainActivity;
+import com.example.simplevrcontroller.R;
+import com.example.simplevrcontroller.R.array;
+import com.example.simplevrcontroller.R.drawable;
+import com.example.simplevrcontroller.R.id;
+import com.example.simplevrcontroller.R.layout;
+import com.example.simplevrcontroller.R.menu;
+import com.example.simplevrcontroller.cave.Cave;
+import com.example.simplevrcontroller.cave.CaveManager;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -22,7 +32,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -35,7 +47,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -51,7 +62,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	DatagramSocket socket;
 	DatagramPacket p;
     boolean _socketOpen = false;
-    String _ip = null;
+    private Cave cave;
     int _port = 8888;
     String _nodeName = null;
     String _axis = null;
@@ -141,12 +152,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     float xdpi;
     float ydpi;
       // Ip Screen 
-    EditText input;
-    Spinner ipValues;
-    SharedPreferences settings;
-    ArrayAdapter<CharSequence> adapter;
-    Map<String, String> collection;
-    SharedPreferences.Editor ip_editor;
       // Main Node Screen -- Find Nodes
     Spinner nodeOptions;
     SharedPreferences nodesFound;
@@ -163,7 +168,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     final String VELVALUE = "VELVALUE";
     
     // For Log
-    static String LOG3 = "INFO";
+    static String LOG_TAG = "Gamepad";
 
     
     /* 
@@ -177,6 +182,10 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	
     	super.onCreate(savedInstanceState); 
     	sense = (SensorManager)getSystemService(SENSOR_SERVICE);
+    	
+    	cave = CaveManager.getCaveManager()
+	    		.getCave(getIntent().getExtras()
+	    				.getString("CAVE"));
     	
     	  //layout orientation = landscape
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); 
@@ -209,7 +218,17 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
         xdpi = metrics.xdpi * getResources().getDisplayMetrics().density + 0.5f;
         width = (int) (xdpi/3f);
 
-        onMainStart(); 
+        onMainStart();
+        
+        AsyncTask.execute(new Runnable(){
+
+			@Override
+			public void run() {
+				openSocket();
+			}
+        	
+        });
+        
     }
 	
 	/*
@@ -278,6 +297,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
      */
     protected void onNavigationStart(){
     	try{
+    		invalidateOptionsMenu();
 	        TableLayout tlayout = (TableLayout) findViewById(R.id.navigationLayout); 
 	        tlayout.setOnTouchListener((OnTouchListener) this);
 	        tlayout.setKeepScreenOn(true);
@@ -406,94 +426,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        });   
     	}
     	catch(Exception e){
-    		Log.d(LOG3, "Exception in NavigationStart: " + e.getMessage());
-    	}
-    }
-    
-    /*
-     * Sets up IP screen
-     *   input -- text editor for adding ip addresses
-     *   ipValues -- displays all currently added ip address
-     *   addIp -- adds the ip displayed in input
-     *   removeIp -- removes ip currently displayed on ipValues
-     *   connectButton -- connects to ip displayed on ipValues
-     */
-    @SuppressWarnings("unchecked")
-	protected void onIpStart(){
-    	
-    	try{
-	    	settings = getSharedPreferences(PREF_IP, 0);
-	        ip_editor = settings.edit();
-	        
-	        input = (EditText) findViewById(R.id.edit);
-	        ipValues = (Spinner) findViewById(R.id.idValues);
-	        Button addIp = (Button) findViewById(R.id.addIpButton);
-	        Button removeIp = (Button) findViewById(R.id.removeIpButton);
-	        Button connectButton = (Button) findViewById(R.id.connect);
-	        
-	        // Allows spinner to dynamically update ip addresses.
-	        CharSequence[] itemArray = 
-	                getResources().getTextArray(R.array.hosts_array);
-	        List<CharSequence> addresses = new ArrayList<CharSequence>(Arrays.asList(itemArray));
-	        adapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item, addresses);
-	        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-	        ipValues.setAdapter(adapter);
-	        ipValues.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-	        	
-	            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) 
-	            {
-	            	_ip = parent.getItemAtPosition(pos).toString(); 
-	            }
-	            public void onNothingSelected(AdapterView<?> parent) {
-	              // Do nothing.
-	            }
-	        });
-	       
-	        
-	        addIp.setOnClickListener(new View.OnClickListener() {
-	            @Override
-	            public void onClick(View v) {
-	                String temp = input.getText().toString();
-	                adapter.add(temp);
-	                ipValues.setAdapter(adapter);
-	                input.setText("");
-	                ip_editor.putString(temp, temp);
-	                ip_editor.commit();
-	            }
-	        });
-	        
-	        removeIp.setOnClickListener(new View.OnClickListener() {
-	            @Override
-	            public void onClick(View v) {
-	                adapter.remove(_ip);
-	                ipValues.setAdapter(adapter);
-	                ip_editor.remove(_ip);
-	                ip_editor.commit();
-	            }
-	        });
-	        
-	        collection = (Map<String, String>) settings.getAll();
-	        if(!collection.isEmpty()){
-	        	Iterator<String> over = collection.values().iterator();
-	        	while(over.hasNext()){
-	        		String temp = over.next();
-	        		adapter.add(temp);
-	        	}
-	        }
-	
-	        connectButton.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					closeSocket();
-			    	openSocket();
-			    	sendSocketCommand(CONNECT, "Connected?");
-				}
-			});
-	        
-    	}
-    	catch(Exception e){
-    		Log.w(LOG3, "Exception in IP Loader: " + e.getMessage());	
-    		onIp = false;
+    		Log.d(LOG_TAG, "Exception in NavigationStart: " + e.getMessage());
     	}
     }
    
@@ -506,6 +439,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     @SuppressWarnings("unchecked")
 	protected void onNodeMainStart(){
     	try{
+    		invalidateOptionsMenu();
 	    	nodesFound = getSharedPreferences(PREF_NODES, 0);
 	        node_editor = nodesFound.edit();
 	       
@@ -609,7 +543,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        
     	}
     	catch(Exception e){
-    		Log.w(LOG3, "Exception in IP Loader: " + e.getMessage());	
+    		Log.w(LOG_TAG, "Exception in IP Loader: " + e.getMessage());	
     		onIp = false;
     	}
     }
@@ -703,7 +637,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	}
     	catch (IOException ie){
         		Toast.makeText(Gamepad.this, "IOException in getting Nodes! " + ie.getMessage(), Toast.LENGTH_SHORT).show();   
-        		Log.w(LOG3, "IOException getNodes: " + ie.getMessage());
+        		Log.w(LOG_TAG, "IOException getNodes: " + ie.getMessage());
         }
 		return true;
     	
@@ -759,6 +693,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
         		Intent intent = new Intent(this, MainActivity.class);
         		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         		startActivity(intent);
+        		finish();
         		return true;
 	        case R.id.subFly:
 	        	sendSocketCommand(FLY, "Fly");
@@ -772,27 +707,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        case R.id.subMove:
 	        	sendSocketCommand(ROTATE, "Rotate World");
 	        	break;
-	     //IP ADDRESS MENU
-	        case R.id.address:
-	        	if (!onIp){
-	        		setContentView(R.layout.ip_input); 
-	        		onNodeMove = false;
-	        		onIp = true;
-	        		onIpStart(); 				
-	        	}
-	        	else{
-	        		onIp = false;
-	        		if(onNavigation){
-	        			setContentView(R.layout.main_navigation); 
-	        			onNavigationStart();
-	        		}
-	        		else{
-	        			onNodeMove = false;
-	        			setContentView(R.layout.find_node);
-	        			onNodeMainStart();
-	        		}
-	        	}
-	            break;
 	     // OPTIONS FOR PITCH/ROLL
 	        case R.id.invertPitch:
 	        	if(invert_pitch){
@@ -872,24 +786,23 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
      * Sets up socket using _ip given by spinner (MyOnItemSelectedListener and ipValues)
      */
     public void openSocket(){
+    	Log.d("SocketOpen", "Connecting...");
     	if (_socketOpen) return;
 	    try{
-	    	if(_ip == null){
-		    	Toast.makeText(Gamepad.this, "ERROR: Select IP!" , Toast.LENGTH_SHORT).show();   
-		    	return;
-	    	}
-	    	serverAddr = InetAddress.getByName(_ip);   	
+	    	serverAddr = InetAddress.getByName(cave.getAddress());   	
 	    	socket = new DatagramSocket();
 	    	_socketOpen = true;
 	    	socket.setSoTimeout(1000);
 	    }
 	    catch (IOException ie){ 
-	    	Log.w(LOG3, "IOException Opening: " + ie.getMessage());
+	    	Log.w(LOG_TAG, "IOException Opening: " + ie.getMessage());
 	    	Toast.makeText(Gamepad.this, "IOException Opening!: " + ie.getMessage() , Toast.LENGTH_SHORT).show();   
 	    }	
 	    catch (Exception e){
-	    	Log.w(LOG3, "Exception: " + e.getMessage());
+	    	Log.w(LOG_TAG, "Exception: " + e.getMessage());
+	    	e.printStackTrace();
 	    }
+    	Log.d("SocketOpen", "Opened with " + _socketOpen);
     }
      
     // Says socket is closed. 
@@ -923,7 +836,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     		if (tag == CONNECT) Toast.makeText(Gamepad.this, "Cannot Connect. Please reconnect to proper IP.", Toast.LENGTH_SHORT).show();   
     		else{
         		Toast.makeText(Gamepad.this, "IOException in Sending! " + ie.getMessage(), Toast.LENGTH_SHORT).show();   
-        		Log.w(LOG3, "IOException Sending: " + ie.getMessage());
+        		Log.w(LOG_TAG, "IOException Sending: " + ie.getMessage());
     		}
         }
     }
@@ -955,7 +868,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	}
     	catch (IOException ie){
         		Toast.makeText(Gamepad.this, "IOException in Sending! " + ie.getMessage(), Toast.LENGTH_SHORT).show();   
-        		Log.w(LOG3, "IOException Sending: " + ie.getMessage());
+        		Log.w(LOG_TAG, "IOException Sending: " + ie.getMessage());
         }
     }
     
@@ -979,7 +892,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	}
     	catch (IOException ie){
         		Toast.makeText(Gamepad.this, "IOException in Sending! " + ie.getMessage(), Toast.LENGTH_SHORT).show();   
-        		Log.w(LOG3, "IOException Sending: " + ie.getMessage());
+        		Log.w(LOG_TAG, "IOException Sending: " + ie.getMessage());
         }
     }
     
@@ -1171,11 +1084,11 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
         case CONNECT:
 	        Toast.makeText(Gamepad.this, "Connected!!", Toast.LENGTH_SHORT).show();
 	        onIp = false;
-		    text_editor.putString(IPVALUE, "ip: " + _ip);
+		    text_editor.putString(IPVALUE, "ip: " + cave.getAddress());
 		    text_editor.commit();
 	        if(onNavigation){
 	        	setContentView(R.layout.main_navigation); 
-	        	ipText.setText("ip: " + _ip);
+	        	ipText.setText("ip: " + cave.getAddress());
 	        	onNavigationStart();
 	        }
 	        else if (onNode){

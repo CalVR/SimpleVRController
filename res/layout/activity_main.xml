@@ -46,7 +46,7 @@
                 android:text="@string/infsym" />
 
             <Button
-                android:id="@+id/buttonTOGGLE"
+                android:id="@+id/buttonGP"
                 style="android:buttonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
                 android:layout_marginTop="70dp"
                 android:background="@drawable/buttonbackground"
                 android:minWidth="220dip"
-                android:text="@string/Go_to_VROOM" />
+                android:text="@string/gamepad" />
 
             <Button
                 android:id="@+id/ButtonTOP200"
@@ -73,7 +73,7 @@
                 style="android:buttonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/buttonTOGGLE"
+                android:layout_above="@+id/buttonGP"
                 android:layout_alignLeft="@+id/ButtonTOP200"
                 android:background="@drawable/buttonbackground"
                 android:minWidth="220dip"
@@ -84,8 +84,8 @@
                 style="android:buttonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/buttonTOGGLE"
-                android:layout_alignBottom="@+id/buttonTOGGLE"
+                android:layout_alignBaseline="@+id/buttonGP"
+                android:layout_alignBottom="@+id/buttonGP"
                 android:layout_alignLeft="@+id/ButtonCOMP"
                 android:background="@drawable/buttonbackground"
                 android:minWidth="220dip"

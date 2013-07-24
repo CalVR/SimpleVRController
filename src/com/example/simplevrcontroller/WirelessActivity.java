@@ -203,8 +203,7 @@ public class WirelessActivity extends Activity {
 					list.append(span);
 			}
 
-			similarity.setText("Location: "
-					+ (wl == null ? "<unknown>" : wl.getCave().getName()));
+			similarity.setText("Location: " + (wl == null ? "<unknown>" : wl.getCave().getName()));
 
 			for (WirelessLocation l : locList)
 				similarity.append("\n" + l.getCave().getName() + " " + l.getStrength());
@@ -216,10 +215,7 @@ public class WirelessActivity extends Activity {
 
 			handler.postDelayed(runner, 500);
 			
-			
-			
 		}
-		
 
 	}
 
@@ -252,29 +248,16 @@ public class WirelessActivity extends Activity {
 
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			// app icon in action bar clicked; go home
 			Intent intent = new Intent(this, MainActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			return true;
-
-		}
-
-		if (item.getTitle().equals("Gamepad")) {
-
-			Intent intent = new Intent(this, GamepadActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
-
-			return true;
 		}
 
 		if (item.getTitle().equals("Wireless Manager")) {
-
 			Intent intent = new Intent(this, WirelessActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
-
 			return true;
 		}
 

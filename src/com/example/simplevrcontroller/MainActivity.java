@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.example.simplevrcontroller.cave.Cave;
 import com.example.simplevrcontroller.cave.CaveManager;
+import com.example.simplevrcontroller.gamepad.Gamepad;
 import com.example.simplevrcontroller.networking.NetworkManager;
 import com.example.simplevrcontroller.networking.location.WirelessLocation;
 import com.example.simplevrcontroller.networking.location.WirelessLocation.AccuracyThreshold;
@@ -83,6 +84,7 @@ public class MainActivity extends Activity {
 		//Add default caves
 		
 		CaveManager.getCaveManager().addCave(new Cave("Tester", "137.110.119.227", 12012, 0));
+		CaveManager.getCaveManager().addCave(new Cave("Local", "rubble.ucsd.edu", 12012, 0));
 		CaveManager.getCaveManager().addCave(new Cave("VROOMCalVR", "VROOMCalVR.calit2.net", 12012, -1));
 		CaveManager.getCaveManager().addCave(new Cave("DWall", "DWall.calit2.net", 12012, -1));
 		CaveManager.getCaveManager().addCave(new Cave("StarCave", "StarCave.calit2.net", 12012, -1));
@@ -197,20 +199,31 @@ public class MainActivity extends Activity {
 		bAll.setOnClickListener(listener);
 		bAll.setOnLongClickListener(listener);
 		
-		// Wrong
-		listener = new BListener(7);
-		bAll = ((Button) this.findViewById(R.id.buttonTOGGLE));
-		bAll.setOnClickListener(listener);
+		// Gamepad
+		listener = new BListener(-1);
+		bAll = ((Button) this.findViewById(R.id.buttonGP));
+		bAll.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				
+				if(connected){
+					Intent intent = new Intent(MainActivity.this, Gamepad.class);
+	            	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	            	intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+	            	intent.putExtra("CAVE", getCurrentCave().getName());
+	            	startActivity(intent);
+				}
+				
+			}
+			
+		});
 		bAll.setOnLongClickListener(listener);
 		
 		listener = new BListener(5);
 		bAll = ((Button) this.findViewById(R.id.ButtonTOP200));
 		bAll.setOnClickListener(listener);
 		bAll.setOnLongClickListener(listener);
-		
-		
-		
-		
 		
 	}
 	
@@ -234,12 +247,8 @@ public class MainActivity extends Activity {
 	 */
 	public boolean connectToServer(String server, int port) {
 		
-		
-		
-		if(server != null){
-			
+		if(server != null)
 			connection = new Connection(server, port);
-		}
 		
 		if(connection == null){
 			System.out.println("Connection not created!");
@@ -332,7 +341,6 @@ public class MainActivity extends Activity {
 			for (Connection c : arg0)
 				try {
 					c.init();
-					
 				} catch (Exception e) {
 					return e;
 				}
@@ -353,18 +361,8 @@ public class MainActivity extends Activity {
 			return true;
 		}
 		
-		if(item.getTitle().equals("Gamepad")){
-			
-			Intent intent = new Intent(this, Gamepad.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-			
-			return true;
-		}
-		
 		switch (item.getItemId()) {
         case android.R.id.home:
-            // app icon in action bar clicked; go home
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
@@ -377,35 +375,27 @@ public class MainActivity extends Activity {
 	
 	@Override
 	public void onPause(){
-		
 		networker.pause();
-		
-		try {
-			File f= new File(this.getFilesDir(), CAVES);
-			f.delete();
-			f.createNewFile();
-			CaveManager.getCaveManager().save(new FileOutputStream(f));
-			
-			String s = "";
-			FileInputStream fis = new FileInputStream(f);
-			while (fis.available() > 0)
-				s = s + (char)fis.read();
-			fis.close();
-			System.out.println(s);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+		save();
 		super.onPause();
 	}
 	
 	@Override
 	public void onResume(){
-
 		networker.resume();
-		
 		super.onResume();
+	}
+	
+	public void save(){
+		try {
+			File f= new File(this.getFilesDir(), CAVES);
+			f.delete();
+			f.createNewFile();
+			CaveManager.getCaveManager().save(new FileOutputStream(f));
+			log("Saved data!");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }
