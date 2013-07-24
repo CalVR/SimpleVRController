@@ -319,7 +319,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 					if(event.getAction() == MotionEvent.ACTION_UP)
 						dy = 0;
 					else
-						dy = event.getHistoricalY(event.getHistorySize() - 1);
+						dy = event.getX() - event.getHistoricalY(event.getHistorySize() - 1);
 	        		
 	        		
 	        		
