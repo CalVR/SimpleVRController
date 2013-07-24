@@ -15,6 +15,7 @@ import com.example.simplevrcontroller.networking.location.WirelessLocator;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.media.Ringtone;
@@ -58,6 +59,8 @@ public class MainActivity extends Activity {
 		
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 		getWindow().setBackgroundDrawableResource(R.drawable.techback);
+		
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		
 		this.getActionBar().setHomeButtonEnabled(true);
 		

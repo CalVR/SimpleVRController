@@ -4,7 +4,6 @@
   android:layout_width="fill_parent"
   android:layout_height="fill_parent"
   android:id="@+id/moveNodeLayout"
-  android:background="@drawable/calitlogo_" 
   android:orientation="vertical">
   
 <Button android:id="@+id/selectAxisButton"

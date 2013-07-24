@@ -5,7 +5,6 @@
 	    android:layout_height="fill_parent"
 	    android:id="@+id/nodeMoveTypeLayout" 
 	    android:stretchColumns="*"
-	    android:background="@drawable/calitlogo_"
 	    
 	    >
 	    

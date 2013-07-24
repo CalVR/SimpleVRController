@@ -177,11 +177,9 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	super.onCreate(savedInstanceState); 
     	sense = (SensorManager)getSystemService(SENSOR_SERVICE);
     	
-    	cave = CaveManager.getCaveManager()
-	    		.getCave(getIntent().getExtras()
-	    				.getString("CAVE"));
+    	cave = CaveManager.getCaveManager().getCave(getIntent().getExtras().getString("CAVE"));
+    	getWindow().setBackgroundDrawableResource(R.drawable.techback);
     	
-    	  //layout orientation = landscape
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); 
         setContentView(R.layout.main); 
         
@@ -324,7 +322,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
             stop.setMaxWidth(width);
             stop.setScaleType(ImageView.ScaleType.FIT_XY);
             
-	        ipText.setText(textValues.getString(IPVALUE, "ip: Select IP"));
+	        ipText.setText(socket.getInetAddress().getHostAddress());
 	        sensorText.setText(textValues.getString(MODEVALUE, "Mode: Select Mode"));
 	        speed.setText(textValues.getString(VELVALUE, "Velocity: 0"));
 	        
@@ -843,7 +841,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     		DatagramPacket get = new DatagramPacket(data, Integer.SIZE);
     		
     		receiveSocket(get);
-    		
+    		 
     		int value = byteToInt(data);
     		updateLayout(value);
     	}
@@ -851,7 +849,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     		if (tag == CONNECT) Toast.makeText(Gamepad.this, "Cannot Connect. Please reconnect to proper IP.", Toast.LENGTH_SHORT).show();   
     		else{
         		Toast.makeText(Gamepad.this, "Exception in Sending! " + ie.getMessage(), Toast.LENGTH_SHORT).show();   
-        		Log.w(LOG_TAG, "IOException Sending: " + ie.getMessage());
+        		Log.w(LOG_TAG, "Exception Sending: " + ie.getMessage());
     		}
         } 
     }
@@ -969,6 +967,11 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 		// Uses orientation to get angles
 		SensorManager.getOrientation(rotationMatrix, anglesInRadians);
 		
+		//TODO: Temporary fix for inversion
+		float tmp = -anglesInRadians[1];
+		anglesInRadians[1] = -anglesInRadians[2];
+		anglesInRadians[2] = tmp;
+		
 		// Checks if angles have changed enough
 		boolean run = false;
 		
@@ -1012,7 +1015,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 		}
 	}
 	 
-	/* 
+	/**
 	 * Processes touch data:
 	 *   down -- starts move procedure
 	 *   pointer down (for 2+ fingers) -- starts zoom procedure
@@ -1039,7 +1042,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 					zoom = true; 
 					move = false; 
 				}
-				break;	
+				break;
 			case MotionEvent.ACTION_POINTER_UP:
 				double value = distance(e);
 				if (Math.abs(value - magnitude) <= 15f){
