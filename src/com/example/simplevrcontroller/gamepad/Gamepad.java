@@ -11,16 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import com.example.simplevrcontroller.MainActivity;
-import com.example.simplevrcontroller.R;
-import com.example.simplevrcontroller.R.array;
-import com.example.simplevrcontroller.R.drawable;
-import com.example.simplevrcontroller.R.id;
-import com.example.simplevrcontroller.R.layout;
-import com.example.simplevrcontroller.R.menu;
-import com.example.simplevrcontroller.cave.Cave;
-import com.example.simplevrcontroller.cave.CaveManager;
+import java.util.concurrent.ExecutionException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -34,7 +25,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -54,13 +44,17 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.simplevrcontroller.MainActivity;
+import com.example.simplevrcontroller.R;
+import com.example.simplevrcontroller.cave.Cave;
+import com.example.simplevrcontroller.cave.CaveManager;
+
 // 
 public class Gamepad extends Activity implements OnTouchListener, SensorEventListener{
 	
 	// Sockets 
 	InetAddress serverAddr;
 	DatagramSocket socket;
-	DatagramPacket p;
     boolean _socketOpen = false;
     private Cave cave;
     int _port = 8888;
@@ -615,17 +609,17 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     		  
     		byte[] data = new byte[1024];
     		DatagramPacket get = new DatagramPacket(data, 1024);
-    		socket.receive(get);
+    		receiveSocket(get);
     		int num = byteToInt(data);
     		
     		for(int i = 0; i< num; i++){
     			byte[] dataSize = new byte[Integer.SIZE];
     			DatagramPacket getSize = new DatagramPacket(dataSize, Integer.SIZE);
-        		socket.receive(getSize);
+    			receiveSocket(getSize);
         		
         		byte[] dataName = new byte[byteToInt(dataSize)];
     			DatagramPacket getName = new DatagramPacket(dataName, byteToInt(dataSize));
-        		socket.receive(getName);
+    			receiveSocket(getName);
         		
         		String temp = new String(dataName);
 
@@ -635,13 +629,34 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     		}
     		node_editor.commit();
     	}
-    	catch (IOException ie){
-        		Toast.makeText(Gamepad.this, "IOException in getting Nodes! " + ie.getMessage(), Toast.LENGTH_SHORT).show();   
-        		Log.w(LOG_TAG, "IOException getNodes: " + ie.getMessage());
+    	catch (Exception ie){
+        		Toast.makeText(Gamepad.this, "Exception in getting Nodes! " + ie.getMessage(), Toast.LENGTH_SHORT).show();   
+        		Log.w(LOG_TAG, "Exception getNodes: " + ie.getMessage());
+        		ie.printStackTrace();
         }
 		return true;
     	
     }
+   	
+   	public void receiveSocket(DatagramPacket pack) throws InterruptedException, ExecutionException, IOException{
+   		IOException e = new AsyncTask<DatagramPacket, Void, IOException>(){
+
+			@Override
+			protected IOException doInBackground(DatagramPacket... params) {
+				for(DatagramPacket pack : params)
+					try {
+						socket.receive(pack);
+					} catch (IOException e) {
+						return e;
+					}
+				return null;
+			}
+			
+		}.execute(pack).get();
+		
+		if(e != null)
+			throw e;
+   	}
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -809,8 +824,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     public void closeSocket(){
     	_socketOpen = false;	    
     } 
-  
-    /*
+    
+    /**
      * Sends menu command to socket. 
      * Receives confirmation messages and then updates layout accordingly (updateLayout(int, int))
      */
@@ -821,27 +836,27 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	}
     	try{	
     		byte[] bytes = (String.valueOf(COMMAND) + String.valueOf(tag) + " ").getBytes();
-	    	p = new DatagramPacket(bytes, bytes.length, serverAddr, _port);
-    		socket.send(p); 
+	    	sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, _port)); 
     		
     		// Gets tag back confirming message sent
     		byte[] data = new byte[Integer.SIZE];
     		DatagramPacket get = new DatagramPacket(data, Integer.SIZE);
-    		socket.receive(get);
+    		
+    		receiveSocket(get);
     		
     		int value = byteToInt(data);
     		updateLayout(value);
     	}
-    	catch (IOException ie){
+    	catch (Exception ie){
     		if (tag == CONNECT) Toast.makeText(Gamepad.this, "Cannot Connect. Please reconnect to proper IP.", Toast.LENGTH_SHORT).show();   
     		else{
-        		Toast.makeText(Gamepad.this, "IOException in Sending! " + ie.getMessage(), Toast.LENGTH_SHORT).show();   
+        		Toast.makeText(Gamepad.this, "Exception in Sending! " + ie.getMessage(), Toast.LENGTH_SHORT).show();   
         		Log.w(LOG_TAG, "IOException Sending: " + ie.getMessage());
     		}
-        }
+        } 
     }
     
-    /*
+    /**
      * Sends a double[] as a byte[] to server
      * Used to send touch and rotation data
      *
@@ -853,23 +868,17 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     			Toast.makeText(Gamepad.this, "Not connected...", Toast.LENGTH_SHORT).show();
     		return;
     	}
-    	try{
-    		String send = String.valueOf(type) + String.valueOf(tag);
-	    	for(int i = 0; i< arrayLength; i++){
-	    		send += (" " + String.valueOf(value[i]));
-	    	}
-	    	send += " ";
-	    	if(tag == MOVE_NODE){
-	    		send += _axis + " ";
-	    	}
-	    	byte[] bytes = send.getBytes();
-			p = new DatagramPacket(bytes, bytes.length, serverAddr, _port);
-			socket.send(p);
-    	}
-    	catch (IOException ie){
-        		Toast.makeText(Gamepad.this, "IOException in Sending! " + ie.getMessage(), Toast.LENGTH_SHORT).show();   
-        		Log.w(LOG_TAG, "IOException Sending: " + ie.getMessage());
-        }
+    	
+    	String send = String.valueOf(type) + String.valueOf(tag);
+	    for(int i = 0; i< arrayLength; i++){
+	    	send += (" " + String.valueOf(value[i]));
+	    }
+	    send += " ";
+	    if(tag == MOVE_NODE){
+	    	send += _axis + " ";
+	    }
+	    byte[] bytes = send.getBytes();
+		sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, _port));
     }
     
     /*
@@ -883,17 +892,30 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     		if (onNode) Toast.makeText(Gamepad.this, "Not connected...", Toast.LENGTH_SHORT).show();
     		return;
     	} 
-    	try{
-	    	String send = String.valueOf(NODE) + String.valueOf(tag) + " " + str + " ";
-	    	byte[] bytes = new byte[send.getBytes().length];
-	    	bytes = send.getBytes();
-			p = new DatagramPacket(bytes, bytes.length, serverAddr, _port);
-			socket.send(p);
-    	}
-    	catch (IOException ie){
-        		Toast.makeText(Gamepad.this, "IOException in Sending! " + ie.getMessage(), Toast.LENGTH_SHORT).show();   
-        		Log.w(LOG_TAG, "IOException Sending: " + ie.getMessage());
-        }
+    	
+    	String send = String.valueOf(NODE) + String.valueOf(tag) + " " + str + " ";
+	    byte[] bytes = new byte[send.getBytes().length];
+	    bytes = send.getBytes();
+		sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, _port));
+		
+    }
+    
+    protected void sendPacket(final DatagramPacket p){
+    	AsyncTask.execute(new Runnable(){
+
+			@Override
+			public void run() {
+				try {
+					socket.send(p);
+				} catch (IOException e) {
+					
+					Toast.makeText(Gamepad.this, "IOException in Sending! " + e.getMessage(), Toast.LENGTH_SHORT).show();   
+	        		Log.w(LOG_TAG, "IOException Sending: " + e.getMessage());
+					e.printStackTrace();
+				}
+			}
+    		
+    	});
     }
     
 
@@ -902,7 +924,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 		// Not used...
 	}
  
-	/*
+	/**
 	 * Processes sensor changes
 	 *    Accelerometer  -- passes through low-pass filter to reduce error
 	 *    Magnetic Field
