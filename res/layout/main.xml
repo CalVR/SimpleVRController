@@ -8,15 +8,17 @@
     <Button
         android:id="@+id/navigationButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
         android:text="Navigation" 
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:textSize="50sp"/>
 
     <Button
         android:id="@+id/nodeButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Nodes" 
-        android:layout_weight="1"/>
+        android:layout_height="fill_parent"
+        android:text="Nodes"
+        android:layout_weight="1"
+        android:textSize="50sp"/>
 	   	 
 </LinearLayout> 

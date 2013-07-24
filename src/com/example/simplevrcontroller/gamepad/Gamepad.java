@@ -297,125 +297,42 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	    	sensorText = (TextView) findViewById(R.id.sensorText);
 	    	ipText = (TextView) findViewById(R.id.ipText);
 	    	accelText = (TextView) findViewById(R.id.accelData);
-	    	final ImageView faster = (ImageView) findViewById(R.id.faster);
-	    	final ImageView stop = (ImageView) findViewById(R.id.stop);
-	    	final ImageView slower = (ImageView) findViewById(R.id.slower);
 	    	final TextView speed = (TextView) findViewById(R.id.velocity);
+	    	View touchControll = findViewById(R.id.touchControl);
             
             speed.setWidth(width);
             ipText.setWidth(width);
             sensorText.setWidth(width);
             accelText.setWidth(width);
             
-            faster.setAdjustViewBounds(true);
-            faster.setMaxHeight(height);
-            faster.setMaxWidth(width);
-            faster.setScaleType(ImageView.ScaleType.FIT_XY);
-            
-            slower.setAdjustViewBounds(true);
-            slower.setMaxHeight(height);
-            slower.setMaxWidth(width);
-            slower.setScaleType(ImageView.ScaleType.FIT_XY);
-            
-            stop.setAdjustViewBounds(true);
-            stop.setMaxHeight(height);
-            stop.setMaxWidth(width);
-            stop.setScaleType(ImageView.ScaleType.FIT_XY);
-            
 	        ipText.setText(socket.getInetAddress().getHostAddress());
 	        sensorText.setText(textValues.getString(MODEVALUE, "Mode: Select Mode"));
 	        speed.setText(textValues.getString(VELVALUE, "Velocity: 0"));
 	        
-	        faster.setOnTouchListener(new OnTouchListener(){
+	        touchControll.setOnTouchListener(new OnTouchListener(){
+
 				@Override
 				public boolean onTouch(View v, MotionEvent event) {
-					switch(event.getAction() & MotionEvent.ACTION_MASK){
-						case MotionEvent.ACTION_DOWN:
-							timeStart = System.currentTimeMillis();
-							faster.setImageResource(R.drawable.buttonplusdown);
-							motionOn = true;
-							break; 		
-						case MotionEvent.ACTION_UP:
-							sendSocketDoubles(VELOCITY, velocity, 1, NAVI);
-							speed.setText("Velocity: " + String.valueOf(roundDecimal(velocity[0])));
-							text_editor.putString(VELVALUE, "Velocity: " + String.valueOf(roundDecimal(velocity[0])));
-				        	text_editor.commit();
-				        	faster.setImageResource(R.drawable.buttonplusup);
-							break;
-						default:
-							long timeRunning = System.currentTimeMillis() - timeStart;
-							if(timeRunning < 1000){
-								velocity[0] += roundDecimal(timeRunning/1000d);
-							}
-							else{
-								velocity[0] += roundDecimal(timeRunning/100d);
-							}
-							velocity[0] = roundDecimal(velocity[0]);
-							speed.setText("Velocity: " + String.valueOf(roundDecimal(velocity[0])));
-							sendSocketDoubles(VELOCITY, velocity,1, NAVI);
-							break;
-					}
-					return true;
-				}
-	        });
-	        
-	        stop.setOnTouchListener(new OnTouchListener(){
-				@Override
-				public boolean onTouch(View v, MotionEvent event) {
-					switch(event.getAction() & MotionEvent.ACTION_MASK){
-						case MotionEvent.ACTION_DOWN:
-							velocity[0] = roundDecimal(0.0);
-							stop.setImageResource(R.drawable.buttonstopdown);
-							motionOn = false; 
-							recalibrate();
-							Toast.makeText(Gamepad.this, "Recalibrating...", Toast.LENGTH_SHORT).show();
-							break; 		
-						case MotionEvent.ACTION_UP:
-							sendSocketDoubles(VELOCITY, velocity,1, NAVI);
-							speed.setText("Velocity: 0.000");
-							text_editor.putString(VELVALUE, "Velocity: 0");
-				        	text_editor.commit();
-				        	stop.setImageResource(R.drawable.buttonstopup);
-				        	
-							break;
-					}
-					return true;
-				}
-	        });
-	        
-	        slower.setOnTouchListener(new OnTouchListener(){
-				@Override
-				public boolean onTouch(View v, MotionEvent event) {
-					switch(event.getAction() & MotionEvent.ACTION_MASK){
-						case MotionEvent.ACTION_DOWN:
-							timeStart = System.currentTimeMillis();
-							slower.setImageResource(R.drawable.buttonminusdown);
-							motionOn = true;
-							break; 		
-						case MotionEvent.ACTION_UP: 
-							sendSocketDoubles(VELOCITY, velocity,1, NAVI);
-							speed.setText("Velocity: " + String.valueOf(roundDecimal(velocity[0])));
-							text_editor.putString(VELVALUE, "Velocity: " + String.valueOf(roundDecimal(velocity[0])));
-				        	text_editor.commit();
-				        	slower.setImageResource(R.drawable.buttonminusup);
-							break;
-						default:
-							long timeRunning = System.currentTimeMillis() -   timeStart;
-							if(timeRunning < 1000){
-								velocity[0] -= roundDecimal(timeRunning/1000d);
-							}
-							else{
-								velocity[0] -= roundDecimal(timeRunning/100d);
-							}
-							velocity[0] = roundDecimal(velocity[0]);
-							speed.setText("Velocity: " + String.valueOf(roundDecimal(velocity[0])));
-							sendSocketDoubles(VELOCITY, velocity,1, NAVI);
-							break;
-					}
+					
+					float dy;
+					
+					if(event.getAction() == MotionEvent.ACTION_UP)
+						dy = 0;
+					else
+						dy = event.getHistoricalY(event.getHistorySize() - 1);
+	        		
+	        		
+	        		
+	        		velocity[0] = roundDecimal(dy);
+	        		
+	        		sendSocketDoubles(VELOCITY, velocity, 1, NAVI);
+					speed.setText("Velocity: " + String.valueOf(roundDecimal(velocity[0])));
+	        		
 					return true;
 				}
 	        	
-	        });   
+	        });
+	        
     	}
     	catch(Exception e){
     		Log.d(LOG_TAG, "Exception in NavigationStart: " + e.getMessage());
