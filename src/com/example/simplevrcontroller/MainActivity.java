@@ -209,13 +209,11 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View arg0) {
 				
-				if(connected){
-					Intent intent = new Intent(MainActivity.this, Gamepad.class);
-	            	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	            	intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-	            	intent.putExtra("CAVE", getCurrentCave().getName());
-	            	startActivity(intent);
-				}
+				Intent intent = new Intent(MainActivity.this, Gamepad.class);
+	            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+	            intent.putExtra("CAVE", getCurrentCave().getName());
+	            startActivity(intent);
 				
 			}
 			
