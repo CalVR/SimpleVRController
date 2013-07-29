@@ -332,8 +332,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
             sensorText.setWidth(width);
             accelText.setWidth(width);
             
-            Log.d("Navigation", "" + socket.isConnected());
-            
 	        ipText.setText(socket.getInetAddress()
 	        		.getHostAddress());
 	        sensorText.setText(textValues.getString(MODEVALUE, "Mode: Select Mode"));
@@ -347,8 +345,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 
 				@Override
 				public boolean onTouch(View v, MotionEvent event) {
-					
-					Log.d("Touch", "" + event.getAction() + " " + MotionEvent.ACTION_MOVE);
 					
 					float dy = 0;
 					
@@ -1043,6 +1039,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 						// Calculates the distance moved by one finger (assumes a pinching movement is used)
 						// If z < 0, then the object moves farther away
 						z_coord[0] = roundDecimal((new_mag- magnitude)/2);
+						//Trying to make it less drastic
+						z_coord[0] /= 2;
 						sendSocketDoubles(ZTRANS, z_coord, 1, NAVI);
 						break;
 					}
