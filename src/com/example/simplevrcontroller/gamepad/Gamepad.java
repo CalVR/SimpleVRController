@@ -24,9 +24,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -41,10 +38,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -126,7 +121,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     Double[] prepare = {0.0, 0.0, 0.0};
     double MIN_DIFF = 0.05d;
     float[] gravity = {0f, 0f, 0f};
-    Double orient = 0d;
     
     // Velocity
     Double[] velocity = {0d};
@@ -933,9 +927,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     		if(type == Sensor.TYPE_MAGNETIC_FIELD){
     			magnetData = s.values.clone();
     		}
-    		if(type == Sensor.TYPE_ORIENTATION){
-    			orient = (double) s.values[0];
-    		}
     	}
 
 		
@@ -975,10 +966,13 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 			}
 		}
 		
+		//anglesInRadians is +/-PI while orient is 0-2PI so this fixes that
+		if(anglesInRadians[0] < 0)
+			anglesInRadians[0] = (float) (2*Math.PI + anglesInRadians[0]);
 		
 		
 		// Gets the orientation angle (Y-axis rotation) and compares it to the previous one
-		resultingAngles[0] = roundDecimal(orient * Math.PI/ 180);
+		resultingAngles[0] = roundDecimal(anglesInRadians[0]);
 		if (Math.abs(resultingAngles[0] - previousAngles[0])< MIN_DIFF){
 			resultingAngles[0] = previousAngles[0];
 		}
