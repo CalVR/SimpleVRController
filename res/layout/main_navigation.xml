@@ -13,35 +13,45 @@
         <TextView
             android:id="@+id/accelData"
             android:text="@string/accel"
-            android:textColor="#ffffff" />
+            android:textColor="#ffffff"
+            android:layout_width="wrap_content"
+            android:layout_height="70dp" />
 
         <TextView
             android:id="@+id/ipText"
             android:layout_width="wrap_content"
             android:text="@string/ip"
-            android:textColor="#ffffff" />
+            android:textColor="#ffffff"
+            android:layout_height="70dp" />
 
         <TextView
+            android:layout_width="wrap_content"
             android:id="@+id/sensorText"
             android:paddingLeft="10dip"
             android:text="@string/sensor"
-            android:textColor="#ffffff" />
+            android:textColor="#ffffff"
+            android:layout_height="70dp" />
 
         <TextView
+            android:layout_width="wrap_content"
             android:id="@+id/velocity"
             android:text="@string/velocity"
-            android:textColor="#ffffff" />
+            android:textColor="#ffffff"
+            android:layout_height="70dp" />
     </LinearLayout>
 
     <View
         android:id="@+id/touchControl"
         android:layout_width="0dp"
         android:layout_height="fill_parent"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:layout_margin="5dp"
+        android:background="#66666666" />
 
     <View
         android:id="@+id/speed"
         android:layout_width="100dp"
-        android:layout_height="fill_parent" />
+        android:layout_height="fill_parent" 
+        android:background="#CCAAAAAA"/>
 
 </LinearLayout>

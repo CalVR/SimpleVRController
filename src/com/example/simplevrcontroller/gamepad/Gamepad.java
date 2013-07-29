@@ -19,10 +19,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -53,14 +57,14 @@ import com.example.simplevrcontroller.cave.CaveManager;
 public class Gamepad extends Activity implements OnTouchListener, SensorEventListener{
 	
 	// Sockets 
-	InetAddress serverAddr;
-	DatagramSocket socket;
-    boolean _socketOpen = false;
-    private Cave cave;
-    int _port = 8888;
-    String _nodeName = null;
-    String _axis = null;
-    Map<String, Boolean> nodeOn = new HashMap<String, Boolean>();;
+	private InetAddress serverAddr;
+	private DatagramSocket socket;
+	private boolean socketOpen = false;
+	private Cave cave;
+	private int _port = 8888;
+	private String _nodeName = null;
+	private String _axis = null;
+	private Map<String, Boolean> nodeOn = new HashMap<String, Boolean>();;
 
     // Type for queueing in CalVR
     static final int COMMAND = 7;
@@ -109,6 +113,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	boolean zoom = false;
 	double magnitude = 1d;
 	double new_mag = 1d;
+	View touchControll, speed;
     
     // For Sensor Values
     private SensorManager sense = null;
@@ -126,6 +131,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     // Velocity
     Double[] velocity = {0d};
 	long timeStart;
+	TextView velText;
     
     // For Node Movement
     double height_adjust = 0d;
@@ -210,7 +216,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
         xdpi = metrics.xdpi * getResources().getDisplayMetrics().density + 0.5f;
         width = (int) (xdpi/3f);
 
-        onMainStart();
+        
         
         AsyncTask.execute(new Runnable(){
 
@@ -220,6 +226,27 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 			}
         	
         });
+        
+        try {
+        	Thread.sleep(500);
+        	int failed = 0;
+        	
+        	while(!socketOpen){
+        		failed++;
+        		if(failed < 5){
+        			Toast.makeText(this, "Failed to connect, trying again...", Toast.LENGTH_SHORT).show();
+        			Thread.sleep(500);
+        		} else {
+        			Toast.makeText(this, "Could not connect to host!", Toast.LENGTH_LONG).show();
+        			return;
+        		}
+        	}
+        	
+        } catch(InterruptedException e){
+        	e.printStackTrace();
+        }
+        
+        onMainStart();
         
     }
 	
@@ -259,10 +286,12 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	navigation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            	onNavigation = true;
+            	
             	onNode = false;
             	setContentView(R.layout.main_navigation);
             	onNavigationStart();
+            	onNavigation = true;
+            	invalidateOptionsMenu();
             }
         });
 	        
@@ -270,12 +299,13 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
             @Override
             public void onClick(View v) {
                 onNavigation = false;
-                onNode = true;
                 setContentView(R.layout.find_node);
                 onNodeMainStart();
                 node_editor.clear();
         		node_editor.commit();
         		nodeAdapter.clear();
+        		onNode = true;
+        		invalidateOptionsMenu();
             }
         });
     }
@@ -289,44 +319,71 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
      */
     protected void onNavigationStart(){
     	try{
-    		invalidateOptionsMenu();
-	        TableLayout tlayout = (TableLayout) findViewById(R.id.navigationLayout); 
-	        tlayout.setOnTouchListener((OnTouchListener) this);
-	        tlayout.setKeepScreenOn(true);
+    		Log.d("Navigation", "Initialization");
+    		LinearLayout layout = (LinearLayout) findViewById(R.id.navigationLayout);
+	        layout.setOnTouchListener((OnTouchListener) this);
+	        layout.setKeepScreenOn(true);
 	        
 	    	sensorText = (TextView) findViewById(R.id.sensorText);
 	    	ipText = (TextView) findViewById(R.id.ipText);
 	    	accelText = (TextView) findViewById(R.id.accelData);
-	    	final TextView speed = (TextView) findViewById(R.id.velocity);
-	    	View touchControll = findViewById(R.id.touchControl);
+	    	velText = (TextView) findViewById(R.id.velocity);
+	    	touchControll = findViewById(R.id.touchControl);
+	    	speed = findViewById(R.id.speed);
+	    	speed.setBackgroundColor(Color.GRAY);
+			speed.setAlpha(.7f);
             
-            speed.setWidth(width);
+	    	velText.setWidth(width);
             ipText.setWidth(width);
             sensorText.setWidth(width);
             accelText.setWidth(width);
             
-	        ipText.setText(socket.getInetAddress().getHostAddress());
+            Log.d("Navigation", "" + socket.isConnected());
+            
+	        ipText.setText(socket.getInetAddress()
+	        		.getHostAddress());
 	        sensorText.setText(textValues.getString(MODEVALUE, "Mode: Select Mode"));
-	        speed.setText(textValues.getString(VELVALUE, "Velocity: 0"));
+	        velText.setText(textValues.getString(VELVALUE, "Velocity: 0"));
 	        
-	        touchControll.setOnTouchListener(new OnTouchListener(){
+	        touchControll.setOnTouchListener(this);
+	        
+	        speed.setOnTouchListener(new OnTouchListener(){
+	        	
+	        	private float old;
 
 				@Override
 				public boolean onTouch(View v, MotionEvent event) {
 					
-					float dy;
+					Log.d("Touch", "" + event.getAction() + " " + MotionEvent.ACTION_MOVE);
 					
-					if(event.getAction() == MotionEvent.ACTION_UP)
+					float dy = 0;
+					
+					if(event.getAction() == MotionEvent.ACTION_UP){
 						dy = 0;
-					else
-						dy = event.getX() - event.getHistoricalY(event.getHistorySize() - 1);
+						speed.setBackgroundColor(Color.GRAY);
+	        			speed.setAlpha(.7f);
+					}
+					else if(event.getAction() == MotionEvent.ACTION_DOWN)
+						old = event.getY();
+					else if(event.getAction() == MotionEvent.ACTION_MOVE)
+						dy = old - event.getY();
 	        		
 	        		
 	        		
 	        		velocity[0] = roundDecimal(dy);
 	        		
+	        		if(dy != 0)
+	        			speed.setAlpha((Math.abs(dy)/ (speed.getHeight() / 2)));
+	        		
+	        		if(dy > 0)
+	        			speed.setBackgroundColor(Color.GREEN);
+	        		else if(dy < 0)
+	        			speed.setBackgroundColor(Color.RED);
+	        		
+	        		
+	        		
 	        		sendSocketDoubles(VELOCITY, velocity, 1, NAVI);
-					speed.setText("Velocity: " + String.valueOf(roundDecimal(velocity[0])));
+	        		velText.setText("Velocity: " + velocity[0]);
 	        		
 					return true;
 				}
@@ -335,7 +392,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        
     	}
     	catch(Exception e){
-    		Log.d(LOG_TAG, "Exception in NavigationStart: " + e.getMessage());
+    		Log.e(LOG_TAG, "Exception in NavigationStart: " + e.getMessage());
+    		e.printStackTrace();
     	}
     }
    
@@ -348,7 +406,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     @SuppressWarnings("unchecked")
 	protected void onNodeMainStart(){
     	try{
-    		invalidateOptionsMenu();
 	    	nodesFound = getSharedPreferences(PREF_NODES, 0);
 	        node_editor = nodesFound.edit();
 	       
@@ -395,7 +452,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 				public void onClick(View v) {
 					if(_nodeName != null){
 						sendSocketString(SELECTNODE, _nodeName);
-						if(_socketOpen) Toast.makeText(Gamepad.this, "Selecting " + _nodeName, Toast.LENGTH_SHORT).show();
+						if(socketOpen) Toast.makeText(Gamepad.this, "Selecting " + _nodeName, Toast.LENGTH_SHORT).show();
 						hideNodes.setClickable(true);
 						Boolean on = nodeOn.get(_nodeName);
 						if(on){
@@ -512,7 +569,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
    	 * Gets node names from CalVR (after find is selected in onNodeMainStart())
    	 */
    	public boolean getNodes(){
-   		if (!_socketOpen) {
+   		if (!socketOpen) {
 			if (onNode) Toast.makeText(Gamepad.this, "Not connected...", Toast.LENGTH_SHORT).show();
 			return false;
    		}	
@@ -717,12 +774,16 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
      */
     public void openSocket(){
     	Log.d("SocketOpen", "Connecting...");
-    	if (_socketOpen) return;
+    	if (socketOpen) return;
 	    try{
+	    	
 	    	serverAddr = InetAddress.getByName(cave.getAddress());   	
 	    	socket = new DatagramSocket();
-	    	_socketOpen = true;
+	    	socket.connect(serverAddr, _port);
+	    	socketOpen = true;
 	    	socket.setSoTimeout(1000);
+	    	Log.d("SocketOpen", "Socket Opened!");
+	    	return;
 	    }
 	    catch (IOException ie){ 
 	    	Log.w(LOG_TAG, "IOException Opening: " + ie.getMessage());
@@ -732,12 +793,12 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	    	Log.w(LOG_TAG, "Exception: " + e.getMessage());
 	    	e.printStackTrace();
 	    }
-    	Log.d("SocketOpen", "Opened with " + _socketOpen);
+    	Log.d("SocketOpen", "Failed to open!");
     }
      
     // Says socket is closed. 
     public void closeSocket(){
-    	_socketOpen = false;	    
+    	socketOpen = false;
     } 
     
     /**
@@ -745,7 +806,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
      * Receives confirmation messages and then updates layout accordingly (updateLayout(int, int))
      */
     public void sendSocketCommand(int tag, String textStr){
-    	if (!_socketOpen) {
+    	if (!socketOpen) {
     		if (onNode) Toast.makeText(Gamepad.this, "Not connected...", Toast.LENGTH_SHORT).show();
     		return;
     	}
@@ -778,7 +839,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
      *   Double[tag, size of value, value, size of value 2, value 2, ...]
      */
     public void sendSocketDoubles(int tag, Double[] value, int arrayLength, int type){  	
-    	if (!_socketOpen) {
+    	if (!socketOpen) {
     		if (onNode)
     			Toast.makeText(Gamepad.this, "Not connected...", Toast.LENGTH_SHORT).show();
     		return;
@@ -803,7 +864,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
      *   Double[tag, size of value, value, size of value 2, value 2, ...]
      */
     public void sendSocketString(int tag, String str){  	
-    	if (!_socketOpen) {
+    	if (!socketOpen) {
     		if (onNode) Toast.makeText(Gamepad.this, "Not connected...", Toast.LENGTH_SHORT).show();
     		return;
     	} 

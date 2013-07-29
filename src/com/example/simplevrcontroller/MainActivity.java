@@ -57,7 +57,6 @@ public class MainActivity extends Activity {
 
 		super.onCreate(savedInstanceState);
 		
-		getWindow().setFormat(PixelFormat.RGBA_8888);
 		getWindow().setBackgroundDrawableResource(R.drawable.techback);
 		
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
