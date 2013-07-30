@@ -373,8 +373,10 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 						speed.setBackgroundColor(Color.GRAY);
 	        			speed.setAlpha(.7f);
 					}
-					else if(event.getAction() == MotionEvent.ACTION_DOWN)
+					else if(event.getAction() == MotionEvent.ACTION_DOWN){
+						speed.setAlpha(.5f);
 						old = event.getY();
+					}
 					else if(event.getAction() == MotionEvent.ACTION_MOVE)
 						dy = old - event.getY();
 	        		
