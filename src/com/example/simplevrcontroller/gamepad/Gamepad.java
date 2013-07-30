@@ -417,7 +417,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	}
     }
    
-    /*
+    /* 
      * Main Node loaded
      *   find -- sends a request to find all AndroidTransform nodes. Calls getNodes() to return them.
      *   selectNode -- whichever node is selected in the nodeOptions spinner becomes the selected node to act upon
