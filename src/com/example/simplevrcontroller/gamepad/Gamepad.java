@@ -64,6 +64,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	private String nodeName;
 	private String axis;
 	private Map<String, Boolean> nodeOn;
+	
+	private static final int MAX_SPEED = 50;
 
     // Type for queueing in CalVR
     static final int COMMAND = 7;
@@ -380,19 +382,25 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 					else if(event.getAction() == MotionEvent.ACTION_MOVE)
 						dy = old - event.getY();
 	        		
-	        		
+					dy = (dy / (speed.getHeight() / 2) * MAX_SPEED);
+					
+					if(dy > MAX_SPEED)
+						dy = MAX_SPEED;
+					
+					if(dy < -MAX_SPEED)
+						dy = -MAX_SPEED;
 	        		
 	        		velocity[0] = roundDecimal(dy);
 	        		
 	        		if(dy != 0)
-	        			speed.setAlpha((Math.abs(dy)/ (speed.getHeight() / 2)));
+	        			speed.setAlpha((Math.abs(dy)/ MAX_SPEED));
 	        		
 	        		if(dy > 0)
 	        			speed.setBackgroundColor(Color.GREEN);
 	        		else if(dy < 0)
 	        			speed.setBackgroundColor(Color.RED);
 	        		
-	        		
+	        		Log.d("asd", "" + velocity[0]);
 	        		
 	        		sendSocketDoubles(VELOCITY, velocity, 1, NAVI);
 	        		velText.setText("Velocity: " + velocity[0]);
@@ -851,8 +859,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
      */
     public void sendSocketDoubles(int tag, Double[] value, int arrayLength, int type){  	
     	if (!socketOpen) {
-    		if (onNode)
-    			Toast.makeText(Gamepad.this, "Not connected...", Toast.LENGTH_SHORT).show();
+    		Toast.makeText(Gamepad.this, "Not connected...", Toast.LENGTH_SHORT).show();
     		return;
     	}
     	
