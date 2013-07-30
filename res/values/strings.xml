@@ -31,5 +31,6 @@
     <string name="nodePrompt">Select Node:</string>
     <string-array name="nodes_array">
     </string-array>
+    <string name="flip">Flip</string>
 
 </resources>

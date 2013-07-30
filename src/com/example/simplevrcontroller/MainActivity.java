@@ -212,7 +212,7 @@ public class MainActivity extends Activity {
 				Intent intent = new Intent(MainActivity.this, Gamepad.class);
 	            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-	            intent.putExtra("CAVE", getCurrentCave().getName());
+	            intent.putExtra("CAVE", getSelectedCave().getName());
 	            startActivity(intent);
 				
 			}
@@ -227,7 +227,7 @@ public class MainActivity extends Activity {
 		
 	}
 	
-	public Cave getCurrentCave(){
+	public Cave getSelectedCave(){
 		return CaveManager.getCaveManager().getCave(spin.getSelectedItem().toString());
 	}
 
@@ -263,7 +263,7 @@ public class MainActivity extends Activity {
 			connected = true;
 			tv.setTextColor(Color.BLACK);
 			log("Connected!");
-			int def = getCurrentCave().getDefaultPreset();
+			int def = getSelectedCave().getDefaultPreset();
 			if(def != -1){
 				log("Sending default: " + def);
 				connection.send(def);
@@ -326,8 +326,8 @@ public class MainActivity extends Activity {
 
 		@Override
 		public boolean onLongClick(View arg0) {
-			getCurrentCave().setDefaultPreset(num);
-			log("Set default preset for " + getCurrentCave().getName() + " to " + num);
+			getSelectedCave().setDefaultPreset(num);
+			log("Set default preset for " + getSelectedCave().getName() + " to " + num);
 			return true;
 		}
 

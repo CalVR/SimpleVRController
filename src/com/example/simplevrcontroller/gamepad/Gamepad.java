@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +28,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -33,6 +36,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -54,12 +58,12 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	// Sockets 
 	private InetAddress serverAddr;
 	private DatagramSocket socket;
-	private boolean socketOpen = false;
+	private boolean socketOpen;
 	private Cave cave;
-	private int _port = 8888;
-	private String _nodeName = null;
-	private String _axis = null;
-	private Map<String, Boolean> nodeOn = new HashMap<String, Boolean>();;
+	private int port;
+	private String nodeName;
+	private String axis;
+	private Map<String, Boolean> nodeOn;
 
     // Type for queueing in CalVR
     static final int COMMAND = 7;
@@ -172,7 +176,11 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
      * @see android.app.Activity#onCreate(android.os.Bundle)
      */
 	@Override 
-    public void onCreate(Bundle savedInstanceState){ 
+    public void onCreate(Bundle savedInstanceState){
+		
+		socketOpen = false;
+		port = 8888;
+		nodeOn = new HashMap<String, Boolean>();
     	
     	super.onCreate(savedInstanceState); 
     	sense = (SensorManager)getSystemService(SENSOR_SERVICE);
@@ -224,10 +232,12 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
         try {
         	Thread.sleep(500);
         	int failed = 0;
+			Log.d("Start", socketOpen + "");
         	
         	while(!socketOpen){
         		failed++;
         		if(failed < 5){
+        			Log.d("Start", "Waiting for connection..." + socketOpen);
         			Toast.makeText(this, "Failed to connect, trying again...", Toast.LENGTH_SHORT).show();
         			Thread.sleep(500);
         		} else {
@@ -337,6 +347,16 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        sensorText.setText(textValues.getString(MODEVALUE, "Mode: Select Mode"));
 	        velText.setText(textValues.getString(VELVALUE, "Velocity: 0"));
 	        
+	        Button flip = (Button) findViewById(R.id.flip);
+			flip.setOnClickListener(new OnClickListener(){
+				
+				@Override
+				public void onClick(View arg0) {
+					sendSocketCommand(FLIP, "Flip");
+				}
+	        	
+	        });
+	        
 	        touchControll.setOnTouchListener(this);
 	        
 	        speed.setOnTouchListener(new OnTouchListener(){
@@ -416,7 +436,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        	
 	            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) 
 	            {
-	            	_nodeName = parent.getItemAtPosition(pos).toString(); 
+	            	nodeName = parent.getItemAtPosition(pos).toString(); 
 	            }
 	            public void onNothingSelected(AdapterView<?> parent) {
 	              // Do nothing.
@@ -440,11 +460,11 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        selectNode.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					if(_nodeName != null){
-						sendSocketString(SELECTNODE, _nodeName);
-						if(socketOpen) Toast.makeText(Gamepad.this, "Selecting " + _nodeName, Toast.LENGTH_SHORT).show();
+					if(nodeName != null){
+						sendSocketString(SELECTNODE, nodeName);
+						if(socketOpen) Toast.makeText(Gamepad.this, "Selecting " + nodeName, Toast.LENGTH_SHORT).show();
 						hideNodes.setClickable(true);
-						Boolean on = nodeOn.get(_nodeName);
+						Boolean on = nodeOn.get(nodeName);
 						if(on){
 							hideNodes.setChecked(false);
 						}
@@ -470,18 +490,18 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        hideNodes.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					if(_nodeName != null){
+					if(nodeName != null){
 						if(hideNodes.isChecked()){ 
 							sendSocketCommand(HIDE, "HideNode");
-							Toast.makeText(Gamepad.this, "Hiding " + _nodeName, Toast.LENGTH_SHORT).show();
-							nodeOn.remove(_nodeName);
-							nodeOn.put(_nodeName, false);
+							Toast.makeText(Gamepad.this, "Hiding " + nodeName, Toast.LENGTH_SHORT).show();
+							nodeOn.remove(nodeName);
+							nodeOn.put(nodeName, false);
 						}
 						else{
 							sendSocketCommand(SHOW, "ShowNode"); 
-							Toast.makeText(Gamepad.this, "Showing " + _nodeName, Toast.LENGTH_SHORT).show();
-							nodeOn.remove(_nodeName);
-							nodeOn.put(_nodeName, true);
+							Toast.makeText(Gamepad.this, "Showing " + nodeName, Toast.LENGTH_SHORT).show();
+							nodeOn.remove(nodeName);
+							nodeOn.put(nodeName, true);
 						}
 					}
 					else{
@@ -523,7 +543,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						_axis = String.valueOf(which);
+						axis = String.valueOf(which);
 				        Toast.makeText(Gamepad.this, axisOptions[which] + " selected.", Toast.LENGTH_SHORT).show();
 					}
 				});
@@ -766,20 +786,19 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	Log.d("SocketOpen", "Connecting...");
     	if (socketOpen) return;
 	    try{
-	    	
 	    	serverAddr = InetAddress.getByName(cave.getAddress());   	
 	    	socket = new DatagramSocket();
-	    	socket.connect(serverAddr, _port);
+	    	socket.connect(new InetSocketAddress(serverAddr, port));
+	    	if(!socket.isConnected())
+	    		throw new Exception("Couldn't open socket!");
 	    	socketOpen = true;
 	    	socket.setSoTimeout(1000);
 	    	Log.d("SocketOpen", "Socket Opened!");
 	    	return;
-	    }
-	    catch (IOException ie){ 
+	    }catch (IOException ie){ 
 	    	Log.w(LOG_TAG, "IOException Opening: " + ie.getMessage());
 	    	Toast.makeText(Gamepad.this, "IOException Opening!: " + ie.getMessage() , Toast.LENGTH_SHORT).show();   
-	    }	
-	    catch (Exception e){
+	    }catch (Exception e){
 	    	Log.w(LOG_TAG, "Exception: " + e.getMessage());
 	    	e.printStackTrace();
 	    }
@@ -802,7 +821,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	}
     	try{	
     		byte[] bytes = (String.valueOf(COMMAND) + String.valueOf(tag) + " ").getBytes();
-	    	sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, _port)); 
+	    	sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, port)); 
     		
     		// Gets tag back confirming message sent
     		byte[] data = new byte[Integer.SIZE];
@@ -841,10 +860,10 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	    }
 	    send += " ";
 	    if(tag == MOVE_NODE){
-	    	send += _axis + " ";
+	    	send += axis + " ";
 	    }
 	    byte[] bytes = send.getBytes();
-		sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, _port));
+		sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, port));
     }
     
     /*
@@ -862,7 +881,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	String send = String.valueOf(NODE) + String.valueOf(tag) + " " + str + " ";
 	    byte[] bytes = new byte[send.getBytes().length];
 	    bytes = send.getBytes();
-		sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, _port));
+		sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, port));
 		
     }
     
@@ -1012,10 +1031,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 				}
 				break;
 			case MotionEvent.ACTION_POINTER_UP:
-				double value = distance(e);
-				if (Math.abs(value - magnitude) <= 15f){
-					sendSocketCommand(FLIP, "Flip");
-				}
 				zoom = false;
 				break;
 	 		case MotionEvent.ACTION_UP:
