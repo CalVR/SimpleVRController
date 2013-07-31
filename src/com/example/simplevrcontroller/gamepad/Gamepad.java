@@ -91,6 +91,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     static final int SELECTNODE = 35;
     static final int HEADTRACK = 36;
     static final int DEVTRACK = 37;
+    static final int RESET = 38;
     static final int HIDE = 31;
     static final int SHOW = 33;
     
@@ -355,12 +356,22 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        sensorText.setText(textValues.getString(MODEVALUE, "Mode: Select Mode"));
 	        velText.setText(textValues.getString(VELVALUE, "Velocity: 0"));
 	        
-	        Button flip = (Button) findViewById(R.id.htrackSelect);
+	        Button flip = (Button) findViewById(R.id.flip);
 			flip.setOnClickListener(new OnClickListener(){
 				
 				@Override
 				public void onClick(View arg0) {
 					sendSocketCommand(FLIP, "Flip");
+				}
+	        	
+	        });
+			
+			Button reset = (Button) findViewById(R.id.reset);
+			reset.setOnClickListener(new OnClickListener(){
+				
+				@Override
+				public void onClick(View arg0) {
+					sendSocketCommand(RESET, "Reset");
 				}
 	        	
 	        });
