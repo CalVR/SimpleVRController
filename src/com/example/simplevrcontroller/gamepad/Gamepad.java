@@ -376,6 +376,16 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        	
 	        });
 			
+			Button recal = (Button) findViewById(R.id.recal);
+			recal.setOnClickListener(new OnClickListener(){
+				
+				@Override
+				public void onClick(View arg0) {
+					recalibrate();
+				}
+	        	
+	        });
+			
 			head = (Button) findViewById(R.id.htrackSelect);
 			head.setOnClickListener(new OnClickListener(){
 
@@ -1134,7 +1144,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 						
 						break;
 					}
-					
 				}
 		}
 		return true;

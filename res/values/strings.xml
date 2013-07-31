@@ -35,6 +35,7 @@
     <string name="manual">Manual</string>
     <string name="hTracking">Head Tracking</string>
     <string name="deviceOrientation">Device Orientation</string>
-    <string name="reset">Reset</string>
+    <string name="reset">Reset View</string>
+    <string name="recal">Recalibrate</string>
 
 </resources>
