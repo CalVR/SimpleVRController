@@ -400,8 +400,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        		else if(dy < 0)
 	        			speed.setBackgroundColor(Color.RED);
 	        		
-	        		Log.d("asd", "" + velocity[0]);
-	        		
 	        		sendSocketDoubles(VELOCITY, velocity, 1, NAVI);
 	        		velText.setText("Velocity: " + velocity[0]);
 	        		
@@ -960,17 +958,12 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 		// Uses orientation to get angles
 		SensorManager.getOrientation(rotationMatrix, anglesInRadians);
 		
-		//TODO: Temporary fix for inversion
-		float tmp = -anglesInRadians[1];
-		anglesInRadians[1] = -anglesInRadians[2];
-		anglesInRadians[2] = tmp;
-		
 		// Checks if angles have changed enough
 		boolean run = false;
 		
 		// Gets difference between result and previous angles for limiting buffer
 		for (int i = 1; i < 3; i++){
-			resultingAngles[i] = roundDecimal((double)anglesInRadians[i]);
+			resultingAngles[i] = -roundDecimal((double)anglesInRadians[i]);
 			prepare[i] = resultingAngles[i]; 
 			resultingAngles[i] = roundDecimal(resultingAngles[i] - recalibration[i]);
 			if(i == 1){
