@@ -1125,15 +1125,16 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 				if (zoom){
 					new_mag = distance(e);
 					// If new_mag too small, prevents zoom. 
-					if(new_mag > 10f && (Math.abs(new_mag - magnitude) > 15f)){
+					if(new_mag > 10f && (Math.abs(new_mag - magnitude) > 1f)){
 						// Calculates the distance moved by one finger (assumes a pinching movement is used)
-						// If z < 0, then the object moves farther away
-						z_coord[0] = roundDecimal((new_mag- magnitude)/2);
-						//Trying to make it less drastic
-						z_coord[0] /= 2;
+						z_coord[0] = roundDecimal((new_mag- magnitude));
 						sendSocketDoubles(ZTRANS, z_coord, 1, NAVI);
+						
+						magnitude = new_mag;
+						
 						break;
 					}
+					
 				}
 		}
 		return true;
