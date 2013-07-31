@@ -33,5 +33,7 @@
     </string-array>
     <string name="flip">Flip</string>
     <string name="manual">Manual</string>
+    <string name="hTracking">Head Tracking</string>
+    <string name="deviceOrientation">Device Orientation</string>
 
 </resources>

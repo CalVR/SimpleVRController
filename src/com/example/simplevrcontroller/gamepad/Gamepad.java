@@ -65,7 +65,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	private String axis;
 	private Map<String, Boolean> nodeOn;
 	
-	private static final int MAX_SPEED = 50;
+	private static final int MAX_SPEED = 200;
 
     // Type for queueing in CalVR
     static final int COMMAND = 7;
@@ -89,75 +89,81 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     static final int FLIP = 32;
     static final int FETCH = 34;
     static final int SELECTNODE = 35;
+    static final int HEADTRACK = 36;
+    static final int DEVTRACK = 37;
     static final int HIDE = 31;
     static final int SHOW = 33;
     
     // Booleans for checks
-    boolean invert_pitch = false;
-    boolean invert_roll = false;
-    boolean toggle_pitch = false;
-    boolean toggle_roll = false;
+    private boolean invert_pitch = false;
+    private boolean invert_roll = false;
+    private boolean toggle_pitch = false;
+    private boolean toggle_roll = false;
     
-    boolean onNavigation = false;
-    boolean onIp = false;
-    boolean motionOn = true;
-    boolean onNode = false;
-    boolean onNodeMove = false;
-    boolean onNodeType = false;
+    private boolean onNavigation = false;
+    private boolean onIp = false;
+    private boolean motionOn = true;
+    private  boolean onNode = false;
+    private boolean onNodeMove = false;
+    private boolean onNodeType = false;
+    
+    private boolean headTracking, devTracking;
     
     // For Touch data 
-	Double[] coords = {0d, 0d};      //Only x and y 
-	Double[] z_coord = {0d};         //Handles z coord
-	double x = 0.0;
-	double y = 0.0;
-	boolean move = false;
-	boolean zoom = false;
-	double magnitude = 1d;
-	double new_mag = 1d;
-	View touchControll, speed;
+    private Double[] coords = {0d, 0d};      //Only x and y 
+    private Double[] z_coord = {0d};         //Handles z coord
+    private double x = 0.0;
+    private double y = 0.0;
+    private boolean move = false;
+    private boolean zoom = false;
+    private double magnitude = 1d;
+    private double new_mag = 1d;
+    private View touchControll, speed;
     
     // For Sensor Values
     private SensorManager sense = null;
-    float[] accelData = new float[3];
-    float[] magnetData = new float[3];
-    float[] rotationMatrix = new float[16];
-    Double[] resultingAngles = {0.0, 0.0, 0.0};
-    Double[] previousAngles = {0d, 0d, 0d};
-    Double[] recalibration = {0.0, 0.0, 0.0};
-    Double[] prepare = {0.0, 0.0, 0.0};
-    double MIN_DIFF = 0.05d;
-    float[] gravity = {0f, 0f, 0f};
+    private float[] accelData = new float[3];
+    private float[] magnetData = new float[3];
+    private float[] rotationMatrix = new float[16];
+    private Double[] resultingAngles = {0.0, 0.0, 0.0};
+    private Double[] previousAngles = {0d, 0d, 0d};
+    private Double[] recalibration = {0.0, 0.0, 0.0};
+    private Double[] prepare = {0.0, 0.0, 0.0};
+    private double MIN_DIFF = 0.05d;
+    private float[] gravity = {0f, 0f, 0f};
     
     // Velocity
-    Double[] velocity = {0d};
-	long timeStart;
-	TextView velText;
+    private Double[] velocity = {0d};
+    private long timeStart;
+    private TextView velText;
     
     // For Node Movement
-    double height_adjust = 0d;
-    double mag = 1d;
-    double x_node = 0d;
-    double y_node = 0d;
-    Double[] adjustment = {0d, 0d, 0d};
+    private double height_adjust = 0d;
+    private double mag = 1d;
+    private double x_node = 0d;
+    private double y_node = 0d;
+    private Double[] adjustment = {0d, 0d, 0d};
     
     // Data inputs
       // Main Navigation Screen
-    TextView sensorText; 
-    TextView ipText; 
-    TextView accelText;
-    SharedPreferences textValues;
-    SharedPreferences.Editor text_editor;
-    int height;
-    int width;
-    float xdpi;
-    float ydpi;
+    private TextView sensorText; 
+    private TextView ipText; 
+    private TextView accelText;
+	private Button head;
+	private Button orient;
+    private SharedPreferences textValues;
+    private SharedPreferences.Editor text_editor;
+    private int height;
+    private  int width;
+    private float xdpi;
+    private float ydpi;
       // Ip Screen 
       // Main Node Screen -- Find Nodes
-    Spinner nodeOptions;
-    SharedPreferences nodesFound;
-    ArrayAdapter<CharSequence> nodeAdapter;
-    Map<String, String> nodeCollection;
-    SharedPreferences.Editor node_editor;
+    private Spinner nodeOptions;
+    private SharedPreferences nodesFound;
+    private ArrayAdapter<CharSequence> nodeAdapter;
+    private Map<String, String> nodeCollection;
+    private SharedPreferences.Editor node_editor;
     
     // For SharedPreferences
     public static final String PREF_IP = "IpPrefs";
@@ -349,12 +355,34 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        sensorText.setText(textValues.getString(MODEVALUE, "Mode: Select Mode"));
 	        velText.setText(textValues.getString(VELVALUE, "Velocity: 0"));
 	        
-	        Button flip = (Button) findViewById(R.id.flip);
+	        Button flip = (Button) findViewById(R.id.htrackSelect);
 			flip.setOnClickListener(new OnClickListener(){
 				
 				@Override
 				public void onClick(View arg0) {
 					sendSocketCommand(FLIP, "Flip");
+				}
+	        	
+	        });
+			
+			head = (Button) findViewById(R.id.htrackSelect);
+			head.setOnClickListener(new OnClickListener(){
+
+				@Override
+				public void onClick(View arg0) {
+					headTracking = !headTracking;
+					refreshHeadTrack();
+				}
+	        	
+	        });
+			
+			orient = (Button) findViewById(R.id.deviceOrientationSelect);
+			orient.setOnClickListener(new OnClickListener(){
+				
+				@Override
+				public void onClick(View arg0) {
+					devTracking = !devTracking;
+					refreshDevOrientationTrack();
 				}
 	        	
 	        });
@@ -413,6 +441,40 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     		Log.e(LOG_TAG, "Exception in NavigationStart: " + e.getMessage());
     		e.printStackTrace();
     	}
+    }
+    
+    public void refreshHeadTrack(){
+    	if(headTracking){
+    		
+    		head.setBackgroundColor(Color.GREEN);
+    		
+    		if(devTracking){
+    			devTracking = false;
+    			refreshDevOrientationTrack();
+    		}
+    		
+    	} else {
+    		head.setBackgroundColor(Color.RED);
+    	}
+		
+		sendSocketCommand(HEADTRACK, "" + headTracking);
+    }
+    
+    public void refreshDevOrientationTrack(){
+    	if(devTracking){
+    		
+    		orient.setBackgroundColor(Color.GREEN);
+    		
+    		if(headTracking){
+    			headTracking = false;
+    			refreshHeadTrack();
+    		}
+    		
+    	} else {
+    		orient.setBackgroundColor(Color.RED);
+    	}
+		
+		sendSocketCommand(DEVTRACK, "" + devTracking);
     }
    
     /* 
@@ -828,7 +890,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     		return;
     	}
     	try{	
-    		byte[] bytes = (String.valueOf(COMMAND) + String.valueOf(tag) + " ").getBytes();
+    		byte[] bytes = (String.valueOf(COMMAND) + String.valueOf(tag) + " " + textStr).getBytes();
 	    	sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, port)); 
     		
     		// Gets tag back confirming message sent

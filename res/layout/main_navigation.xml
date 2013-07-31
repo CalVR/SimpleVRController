@@ -6,7 +6,7 @@
     android:orientation="horizontal" >
 
     <LinearLayout
-        android:layout_width="100dp"
+        android:layout_width="120dp"
         android:layout_height="fill_parent"
         android:orientation="vertical" >
 
@@ -14,18 +14,18 @@
             android:id="@+id/accelData"
             android:text="@string/accel"
             android:textColor="#ffffff"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="70dp" />
 
         <TextView
             android:id="@+id/ipText"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:text="@string/ip"
             android:textColor="#ffffff"
             android:layout_height="70dp" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:id="@+id/sensorText"
             android:paddingLeft="10dip"
             android:text="@string/sensor"
@@ -33,7 +33,7 @@
             android:layout_height="70dp" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:id="@+id/velocity"
             android:text="@string/velocity"
             android:textColor="#ffffff"
@@ -41,9 +41,21 @@
         
         <Button
             android:id="@+id/flip"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="70dp"
             android:text="@string/flip" />
+        
+        <Button
+            android:id="@+id/htrackSelect"
+            android:layout_width="fill_parent"
+            android:layout_height="70dp"
+            android:text="@string/hTracking" />
+        
+        <Button
+            android:id="@+id/deviceOrientationSelect"
+            android:layout_width="fill_parent"
+            android:layout_height="70dp"
+            android:text="@string/deviceOrientation" />
 
     </LinearLayout>
 
