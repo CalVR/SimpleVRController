@@ -118,6 +118,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     private boolean move = false;
     private boolean zoom = false;
     private double magnitude = 1d;
+    private double fingerAngle = 1d;
     private double new_mag = 1d;
     private View touchControll, speed;
     
@@ -1114,36 +1115,62 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 					zoom = true; 
 					move = false; 
 				}
+				
+				fingerAngle = angle(e);
+				
 				break;
 			case MotionEvent.ACTION_POINTER_UP:
+				x = -1;
+				y = -1;
 				zoom = false;
 				break;
 	 		case MotionEvent.ACTION_UP:
 				move = false;
 				break;
 			case MotionEvent.ACTION_MOVE:
-				if (move){
+				
+				
+				
+				switch(e.getPointerCount()){
+				case 1:
 					coords[0] = roundDecimal(e.getX() - x);
 					coords[1] = roundDecimal(e.getY() - y);
 					
 					x = e.getX();
 					y = e.getY();
 					
-					sendSocketDoubles(TRANS, coords, 2, NAVI);
+					if(x != -1 && y != -1)
+						sendSocketDoubles(TRANS, coords, 2, NAVI);
 					break;
-				}
-				if (zoom){
+				case 2:
 					new_mag = distance(e);
 					// If new_mag too small, prevents zoom. 
 					if(new_mag > 10f && (Math.abs(new_mag - magnitude) > 1f)){
 						// Calculates the distance moved by one finger (assumes a pinching movement is used)
-						z_coord[0] = roundDecimal((new_mag- magnitude));
+						z_coord[0] = roundDecimal((new_mag- magnitude)*2);
 						sendSocketDoubles(ZTRANS, z_coord, 1, NAVI);
-						
 						magnitude = new_mag;
 						
-						break;
 					}
+					
+					
+					double new_rot = angle(e);
+					Log.d("rot", e.getX(0) + ":" + e.getY(0) + " " + e.getX(1) + ":" + e.getY(1) + " " + new_rot + " " + fingerAngle);
+					if(Math.abs(fingerAngle - new_rot) > .01f){
+						
+						//check for difference between 2PI and 0 for drastic change when number switches from + to -
+						
+						Double[] rot = new Double[3];
+						rot[0] = 0d;
+						rot[1] = 0d;
+						rot[2] = roundDecimal(fingerAngle - new_rot) * 50;
+						sendSocketDoubles(ROT, rot, 3, NAVI);
+						fingerAngle = new_rot;
+					}
+					
+					break;
+				case 3:
+					break;
 				}
 		}
 		return true;
@@ -1198,15 +1225,25 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
         	Toast.makeText(Gamepad.this, "Rotation Command received", Toast.LENGTH_SHORT).show();
 	        break; 
     	}
- }
-	
-    /*
+    }
+    
+    /**
      * Calculates distance between two fingers (for zoom)
+     * @param e Motion Event to read
+     * @return
      */
 	private double distance(MotionEvent e) {
 		double x = e.getX(0) - e.getX(1);
 		double y = e.getY(0) - e.getY(1);
 		return Math.sqrt(x*x + y*y);
+	}
+	
+	private double angle(MotionEvent e){
+		
+		float outX = e.getX(1) - e.getX(0);
+		float outY = e.getY(1) - e.getY(0);
+		
+		return Math.atan2(outY, outX);
 	}
 	
 	/*
