@@ -89,10 +89,10 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int settings=0x7f0b0039;
         public static final int similarity=0x7f0b0014;
         public static final int speed=0x7f0b0027;
+        public static final int subAirplane=0x7f0b0036;
         public static final int subDrive=0x7f0b0037;
-        public static final int subFly=0x7f0b0035;
-        public static final int subMove=0x7f0b0038;
-        public static final int subNewFly=0x7f0b0036;
+        public static final int subManual=0x7f0b0035;
+        public static final int subOldFly=0x7f0b0038;
         public static final int swipe_view=0x7f0b0004;
         public static final int symbutton=0x7f0b0015;
         public static final int tester=0x7f0b0011;
@@ -146,6 +146,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int infsym=0x7f070007;
         public static final int ip=0x7f070014;
         public static final int ipPrompt=0x7f070017;
+        public static final int manual=0x7f07001a;
         public static final int nodePrompt=0x7f070018;
         public static final int reconnect=0x7f07000c;
         public static final int savelist=0x7f07000e;

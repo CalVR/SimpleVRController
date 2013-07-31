@@ -6,14 +6,14 @@
         android:title="Movement Modes"
         >
             <menu>
-                    <item android:id="@+id/subFly" 
-                        android:title="Fly" />
-                    <item android:id="@+id/subNewFly" 
-                        android:title="New Fly" />
+                    <item android:id="@+id/subManual" 
+                        android:title="@string/manual" />
+                    <item android:id="@+id/subAirplane" 
+                        android:title="Airplane" />
                     <item android:id="@+id/subDrive" 
                         android:title="Drive" />
-                    <item android:id="@+id/subMove" 
-                        android:title="Rotate World" />
+                    <item android:id="@+id/subOldFly" 
+                        android:title="Old Fly" />
                         
             </menu>
         </item>

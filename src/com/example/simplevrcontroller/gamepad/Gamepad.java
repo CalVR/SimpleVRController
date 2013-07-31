@@ -80,10 +80,10 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     static final int VELOCITY = 13;
     static final int MOVE_NODE = 14;
         // Mode
-    static final int FLY = 20;
+    static final int MANUAL = 20;
     static final int DRIVE = 21;
-    static final int ROTATE = 22; 
-    static final int NEW_FLY = 23;
+    static final int OLD_FLY = 23; 
+    static final int AIRPLANE = 22;
         //Command
     static final int CONNECT = 30;
     static final int FLIP = 32;
@@ -702,17 +702,17 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
         		startActivity(intent);
         		finish();
         		return true;
-	        case R.id.subFly:
-	        	sendSocketCommand(FLY, "Fly");
+	        case R.id.subManual:
+	        	sendSocketCommand(MANUAL, "Manual");
 	        	break; 
-	        case R.id.subNewFly:
-	        	sendSocketCommand(NEW_FLY, "New Fly");
+	        case R.id.subAirplane:
+	        	sendSocketCommand(AIRPLANE, "Aiplane");
 	        	break; 
 	        case R.id.subDrive:
 	        	sendSocketCommand(DRIVE, "Drive");
 	        	break;
-	        case R.id.subMove:
-	        	sendSocketCommand(ROTATE, "Rotate World");
+	        case R.id.subOldFly:
+	        	sendSocketCommand(OLD_FLY, "Old Fly");
 	        	break;
 	     // OPTIONS FOR PITCH/ROLL
 	        case R.id.invertPitch:
@@ -1080,9 +1080,9 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	 */
     public void updateLayout(int tag){
     	switch(tag){
-        case FLY:
-			sensorText.setText("Mode: Fly");
-			text_editor.putString(MODEVALUE, "Mode: Fly");
+        case MANUAL:
+			sensorText.setText("Mode: Manual");
+			text_editor.putString(MODEVALUE, "Mode: Manual");
 			text_editor.commit();
 			break;
         case DRIVE:
@@ -1090,14 +1090,14 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 			text_editor.putString(MODEVALUE, "Mode: Drive");
 			text_editor.commit();
 			 break;
-        case ROTATE:
-			sensorText.setText("Mode: Rotate World");
-			text_editor.putString(MODEVALUE, "Mode: Rotate World");
+        case OLD_FLY:
+			sensorText.setText("Mode: Old Fly");
+			text_editor.putString(MODEVALUE, "Mode: Old Fly");
 			text_editor.commit();
 			break;
-        case NEW_FLY:
-			sensorText.setText("Mode: New Fly");
-			text_editor.putString(MODEVALUE, "Mode: New Fly");
+        case AIRPLANE:
+			sensorText.setText("Mode: Airplane");
+			text_editor.putString(MODEVALUE, "Mode: Airplane");
 			text_editor.commit();
 			break;
         case CONNECT:
