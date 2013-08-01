@@ -1120,6 +1120,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 			case MotionEvent.ACTION_POINTER_UP:
 				x = -1;
 				y = -1;
+				magnitude = distance(e);
 				break;
 	 		case MotionEvent.ACTION_UP:
 				break;
