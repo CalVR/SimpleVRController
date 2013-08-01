@@ -80,6 +80,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     static final int ZTRANS = 12;
     static final int VELOCITY = 13;
     static final int MOVE_NODE = 14;
+    static final int ORIENT = 15;
         // Mode
     static final int MANUAL = 20;
     static final int DRIVE = 21;
@@ -171,6 +172,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     final String VELVALUE = "VELVALUE";
 	private double oldXP;
 	private double oldYP;
+	private Double oldOrient;
     
     // For Log
     static String LOG_TAG = "Gamepad";
@@ -456,6 +458,9 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     
     public void refreshDevOrientationTrack(){
     	if(devTracking){
+    		
+    		//Since it is measured in radians we have to be more drstic
+    		oldOrient = Double.POSITIVE_INFINITY;
     		
     		orient.setBackgroundColor(Color.GREEN);
     		
@@ -1043,8 +1048,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 		}
 		
 		//anglesInRadians is +/-PI while orient is 0-2PI so this fixes that
-		if(anglesInRadians[0] < 0)
-			anglesInRadians[0] = (float) (2*Math.PI + anglesInRadians[0]);
+		//if(anglesInRadians[0] < 0)
+		//	anglesInRadians[0] = (float) (2*Math.PI + anglesInRadians[0]);
 		
 		
 		// Gets the orientation angle (Y-axis rotation) and compares it to the previous one
@@ -1056,10 +1061,19 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 			run = true;
 		}
 		
-		
 		if (run){
 			accelText.setText("Accel: " + resultingAngles[0] + ", " + resultingAngles[1] + ", " + resultingAngles[2]);
 			sendSocketDoubles(ROT, resultingAngles, 3, NAVI);
+			
+			
+			if(devTracking){
+				
+				if(oldOrient == Double.POSITIVE_INFINITY)
+					oldOrient = resultingAngles[0];
+				
+				Double[] orientation = {resultingAngles[0] - oldOrient};
+				sendSocketDoubles(ORIENT, orientation, 1, NAVI);
+			}
 		}
 	}
 	 
