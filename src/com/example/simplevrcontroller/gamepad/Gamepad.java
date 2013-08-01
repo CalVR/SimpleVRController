@@ -103,9 +103,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     private boolean toggle_roll = false;
     
     private boolean onNavigation = false;
-    private boolean onIp = false;
-    private boolean motionOn = true;
-    private  boolean onNode = false;
+    private boolean motionOn = false;
+    private boolean onNode = false;
     private boolean onNodeMove = false;
     private boolean onNodeType = false;
     
@@ -114,13 +113,11 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     // For Touch data 
     private Double[] coords = {0d, 0d};      //Only x and y 
     private Double[] z_coord = {0d};         //Handles z coord
-    private double x = 0.0;
-    private double y = 0.0;
-    private boolean move = false;
-    private boolean zoom = false;
-    private double magnitude = 1d;
-    private double fingerAngle = 1d;
-    private double new_mag = 1d;
+    private double x;
+    private double y;
+    private double magnitude;
+    private double fingerAngle;
+    private double new_mag;
     private View touchControll, speed;
     
     // For Sensor Values
@@ -137,7 +134,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     
     // Velocity
     private Double[] velocity = {0d};
-    private long timeStart;
     private TextView velText;
     
     // For Node Movement
@@ -154,10 +150,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     private TextView accelText;
 	private Button head;
 	private Button orient;
-    private SharedPreferences textValues;
-    private SharedPreferences.Editor text_editor;
     private int height;
-    private  int width;
+    private int width;
     private float xdpi;
     private float ydpi;
       // Ip Screen 
@@ -206,10 +200,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
         
 		this.getActionBar().setHomeButtonEnabled(true);
         
-        textValues = getSharedPreferences(PREF_DATA, 0);
-        text_editor = textValues.edit();
-        motionOn = true;
-        
         // Calculates screen dimensions
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -257,8 +247,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	super.onPause();
     	sense.unregisterListener(this); 
     	closeSocket();
-    	text_editor.clear();
-    	text_editor.commit();
     }
     
     /*
@@ -338,8 +326,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
             
 	        ipText.setText(socket.getInetAddress()
 	        		.getHostAddress());
-	        sensorText.setText(textValues.getString(MODEVALUE, "Mode: Select Mode"));
-	        velText.setText(textValues.getString(VELVALUE, "Velocity: 0"));
+	        sensorText.setText("Please select a mode");
+	        velText.setText("Velocity: 0");
 	        
 	        Button flip = (Button) findViewById(R.id.flip);
 			flip.setOnClickListener(new OnClickListener(){
@@ -595,8 +583,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        
     	}
     	catch(Exception e){
-    		Log.w(LOG_TAG, "Exception in IP Loader: " + e.getMessage());	
-    		onIp = false;
+    		Log.w(LOG_TAG, "Exception in Node Loader: " + e.getMessage());
+    		e.printStackTrace();
     	}
     }
     
@@ -846,7 +834,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	        case R.id.returnMain:
 	        	setContentView(R.layout.main); 
         		onMainStart();
-        		onIp = false;
         		onNavigation = false;
         		onNode = false;
         		onNodeMove = false;
@@ -1094,7 +1081,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 			case MotionEvent.ACTION_DOWN:
 				x = e.getX();
 				y = e.getY();
-				move = true; 
 				break; 			
 			case MotionEvent.ACTION_POINTER_DOWN:
 				
@@ -1120,10 +1106,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 			case MotionEvent.ACTION_POINTER_UP:
 				x = -1;
 				y = -1;
-				zoom = false;
 				break;
 	 		case MotionEvent.ACTION_UP:
-				move = false;
 				break;
 			case MotionEvent.ACTION_MOVE:
 				
@@ -1205,33 +1189,28 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
         case MANUAL:
         	motionOn = false;
 			sensorText.setText("Mode: Manual");
-			text_editor.putString(MODEVALUE, "Mode: Manual");
-			text_editor.commit();
 			break;
         case DRIVE:
         	motionOn = true;
 			sensorText.setText("Mode: Drive");
-			text_editor.putString(MODEVALUE, "Mode: Drive");
-			text_editor.commit();
 			 break;
         case OLD_FLY:
         	motionOn = true;
 			sensorText.setText("Mode: Old Fly");
-			text_editor.putString(MODEVALUE, "Mode: Old Fly");
-			text_editor.commit();
 			break;
         case AIRPLANE:
         	motionOn = true;
 			sensorText.setText("Mode: Airplane");
-			text_editor.putString(MODEVALUE, "Mode: Airplane");
-			text_editor.commit();
 			break;
         case CONNECT:
 	        Toast.makeText(Gamepad.this, "Connected!!", Toast.LENGTH_SHORT).show();
 		    break;
         case FLIP:  		
-        	Toast.makeText(Gamepad.this, "Rotation Command received", Toast.LENGTH_SHORT).show();
-	        break; 
+        	Toast.makeText(Gamepad.this, "Flip Command received", Toast.LENGTH_SHORT).show();
+	        break;
+        case RESET:  		
+        	Toast.makeText(Gamepad.this, "Resetting view...", Toast.LENGTH_SHORT).show();
+	        break;
     	}
     }
     
