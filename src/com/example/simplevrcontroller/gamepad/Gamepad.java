@@ -66,7 +66,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	private Map<String, Boolean> nodeOn;
 	
 	private static final int MAX_SPEED = 200;
-
+	private static final int FINGER_COUNT_ORIENT = 2;
+	
     // Type for queueing in CalVR
     static final int COMMAND = 7;
     static final int NAVI = 8;
@@ -174,6 +175,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     final String IPVALUE = "IPVALUE";
     final String MODEVALUE = "MODEVALUE";
     final String VELVALUE = "VELVALUE";
+	private double oldXP;
+	private double oldYP;
     
     // For Log
     static String LOG_TAG = "Gamepad";
@@ -234,31 +237,12 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 
 			@Override
 			public void run() {
+				//Looper.prepare();
 				openSocket();
+				//sendSocketCommand(CONNECT, "Connected?");
 			}
         	
         });
-        
-        try {
-        	Thread.sleep(500);
-        	int failed = 0;
-			Log.d("Start", socketOpen + "");
-        	
-        	while(!socketOpen){
-        		failed++;
-        		if(failed < 5){
-        			Log.d("Start", "Waiting for connection..." + socketOpen);
-        			Toast.makeText(this, "Failed to connect, trying again...", Toast.LENGTH_SHORT).show();
-        			Thread.sleep(500);
-        		} else {
-        			Toast.makeText(this, "Could not connect to host!", Toast.LENGTH_LONG).show();
-        			return;
-        		}
-        	}
-        	
-        } catch(InterruptedException e){
-        	e.printStackTrace();
-        }
         
         onMainStart();
         
@@ -755,7 +739,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	return true;
     }
     
-    /*
+    /**
      * Handles when menu and submenu options are selected:
      *   subFly -- enters fly mode -- NAVI
      *   subNewFly -- enters new fly mode -- NAVI
@@ -871,7 +855,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
         return true;
     }
    
-    /*
+    /**
      * Sets up socket using _ip given by spinner (MyOnItemSelectedListener and ipValues)
      */
     public void openSocket(){
@@ -886,6 +870,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	    	socketOpen = true;
 	    	socket.setSoTimeout(1000);
 	    	Log.d("SocketOpen", "Socket Opened!");
+	    	
 	    	return;
 	    }catch (IOException ie){ 
 	    	Log.w(LOG_TAG, "IOException Opening: " + ie.getMessage());
@@ -925,7 +910,10 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     		updateLayout(value);
     	}
     	catch (Exception ie){
-    		if (tag == CONNECT) Toast.makeText(Gamepad.this, "Cannot Connect. Please reconnect to proper IP.", Toast.LENGTH_SHORT).show();   
+    		if (tag == CONNECT) {
+    			Toast.makeText(Gamepad.this, "Cannot Connect. Please reconnect to proper IP.", Toast.LENGTH_SHORT).show();
+    			socketOpen = false;
+    		}
     		else{
         		Toast.makeText(Gamepad.this, "Exception in Sending! " + ie.getMessage(), Toast.LENGTH_SHORT).show();   
         		Log.w(LOG_TAG, "Exception Sending: " + ie.getMessage());
@@ -1101,7 +1089,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	@Override
 	public boolean onTouch(View v, MotionEvent e){
 		if (!onNavigation) return false;
-		if (!motionOn) return false;
 		
 		switch(e.getAction() & MotionEvent.ACTION_MASK){
 			case MotionEvent.ACTION_DOWN:
@@ -1110,10 +1097,21 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 				move = true; 
 				break; 			
 			case MotionEvent.ACTION_POINTER_DOWN:
-				// If magnitude too small (fingers resting) won't run
-				if ((magnitude = distance(e)) > 10f){
-					zoom = true; 
-					move = false; 
+				
+				magnitude = distance(e);
+				
+				if(e.getPointerCount() >= FINGER_COUNT_ORIENT){
+					int tmpX = 0, tmpY = 0;
+					for(int i = 0; i < FINGER_COUNT_ORIENT; i++){
+						tmpY += e.getY(i);
+						tmpX += e.getX(i);
+					}
+				
+					tmpX /= FINGER_COUNT_ORIENT;
+					tmpY /= FINGER_COUNT_ORIENT;
+				
+					oldXP = tmpX / (double)v.getWidth();
+					oldYP = tmpY / (double)v.getHeight();
 				}
 				
 				fingerAngle = angle(e);
@@ -1129,18 +1127,18 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 				break;
 			case MotionEvent.ACTION_MOVE:
 				
-				
-				
 				switch(e.getPointerCount()){
 				case 1:
+					
 					coords[0] = roundDecimal(e.getX() - x);
 					coords[1] = roundDecimal(e.getY() - y);
+					
+					if(x != -1 && y != -1)
+						sendSocketDoubles(TRANS, coords, 2, NAVI);
 					
 					x = e.getX();
 					y = e.getY();
 					
-					if(x != -1 && y != -1)
-						sendSocketDoubles(TRANS, coords, 2, NAVI);
 					break;
 				case 2:
 					new_mag = distance(e);
@@ -1155,21 +1153,42 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 					
 					
 					double new_rot = angle(e);
-					Log.d("rot", e.getX(0) + ":" + e.getY(0) + " " + e.getX(1) + ":" + e.getY(1) + " " + new_rot + " " + fingerAngle);
-					if(Math.abs(fingerAngle - new_rot) > .01f){
-						
-						//check for difference between 2PI and 0 for drastic change when number switches from + to -
+					double dA = fingerAngle - new_rot;
+					//Not the best way to prevent flip, but its easy.
+					if(Math.abs(dA) < Math.PI && Math.abs(dA) > .01f){
 						
 						Double[] rot = new Double[3];
 						rot[0] = 0d;
 						rot[1] = 0d;
-						rot[2] = roundDecimal(fingerAngle - new_rot) * 50;
+						rot[2] = roundDecimal(dA) * 40;
 						sendSocketDoubles(ROT, rot, 3, NAVI);
 						fingerAngle = new_rot;
 					}
 					
-					break;
+					//break;
 				case 3:
+					
+					int totX = 0, totY = 0;
+					for(int i = 0; i < FINGER_COUNT_ORIENT; i++){
+						totY += e.getY(i);
+						totX += e.getX(i);
+					}
+					
+					totX /= FINGER_COUNT_ORIENT;
+					totY /= FINGER_COUNT_ORIENT;
+					
+					double xP = totX / (double)v.getWidth(),
+							yP = totY / (double)v.getHeight();
+					
+					Double[] rot = new Double[3];
+					rot[0] = (xP - oldXP) * (Math.PI + Math.PI) * 40;
+					rot[1] = (yP - oldYP) * (Math.PI + Math.PI) * 40;
+					rot[2] = 0d;
+					sendSocketDoubles(ROT, rot, 3, NAVI);
+					
+					oldXP = xP;
+					oldYP = yP;
+					
 					break;
 				}
 		}
@@ -1184,42 +1203,31 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     public void updateLayout(int tag){
     	switch(tag){
         case MANUAL:
+        	motionOn = false;
 			sensorText.setText("Mode: Manual");
 			text_editor.putString(MODEVALUE, "Mode: Manual");
 			text_editor.commit();
 			break;
         case DRIVE:
+        	motionOn = true;
 			sensorText.setText("Mode: Drive");
 			text_editor.putString(MODEVALUE, "Mode: Drive");
 			text_editor.commit();
 			 break;
         case OLD_FLY:
+        	motionOn = true;
 			sensorText.setText("Mode: Old Fly");
 			text_editor.putString(MODEVALUE, "Mode: Old Fly");
 			text_editor.commit();
 			break;
         case AIRPLANE:
+        	motionOn = true;
 			sensorText.setText("Mode: Airplane");
 			text_editor.putString(MODEVALUE, "Mode: Airplane");
 			text_editor.commit();
 			break;
         case CONNECT:
 	        Toast.makeText(Gamepad.this, "Connected!!", Toast.LENGTH_SHORT).show();
-	        onIp = false;
-		    text_editor.putString(IPVALUE, "ip: " + cave.getAddress());
-		    text_editor.commit();
-	        if(onNavigation){
-	        	setContentView(R.layout.main_navigation); 
-	        	ipText.setText("ip: " + cave.getAddress());
-	        	onNavigationStart();
-	        }
-	        else if (onNode){
-	        	setContentView(R.layout.find_node);
-	        	nodeAdapter.clear();
-	        	node_editor.clear();
-        		node_editor.commit();
-	        	onNodeMainStart();
-	        }
 		    break;
         case FLIP:  		
         	Toast.makeText(Gamepad.this, "Rotation Command received", Toast.LENGTH_SHORT).show();
