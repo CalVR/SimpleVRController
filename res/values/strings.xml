@@ -37,5 +37,8 @@
     <string name="deviceOrientation">Device Orientation</string>
     <string name="reset">Reset View</string>
     <string name="recal">Recalibrate</string>
+    <string name="cave">Cave</string>
+    <string name="speed">Max Speed</string>
+    <string name="save">Save</string>
 
 </resources>

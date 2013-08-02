@@ -60,12 +60,10 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	private DatagramSocket socket;
 	private boolean socketOpen;
 	private Cave cave;
-	private int port;
 	private String nodeName;
 	private String axis;
 	private Map<String, Boolean> nodeOn;
 	
-	private static final int MAX_SPEED = 200;
 	private static final int FINGER_COUNT_ORIENT = 2;
 	
     // Type for queueing in CalVR
@@ -151,12 +149,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     private TextView accelText;
 	private Button head;
 	private Button orient;
-    private int height;
-    private int width;
     private float xdpi;
-    private float ydpi;
-      // Ip Screen 
-      // Main Node Screen -- Find Nodes
+    // Main Node Screen -- Find Nodes
     private Spinner nodeOptions;
     private SharedPreferences nodesFound;
     private ArrayAdapter<CharSequence> nodeAdapter;
@@ -164,8 +158,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     private SharedPreferences.Editor node_editor;
     
     // For SharedPreferences
-    public static final String PREF_IP = "IpPrefs";
-    public static final String PREF_DATA = "DataPref";
     public static final String PREF_NODES = "NodesPref";
     final String IPVALUE = "IPVALUE";
     final String MODEVALUE = "MODEVALUE";
@@ -188,7 +180,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     public void onCreate(Bundle savedInstanceState){
 		
 		socketOpen = false;
-		port = 8888;
 		nodeOn = new HashMap<String, Boolean>();
     	
     	super.onCreate(savedInstanceState); 
@@ -204,24 +195,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
         
         // Calculates screen dimensions
         DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        int statusHeight;   
-        switch(metrics.densityDpi){
-	        case DisplayMetrics.DENSITY_HIGH:
-	        	statusHeight = 38; // HIGH DPI STATUS HEIGHT
-	        	break;
-	        case DisplayMetrics.DENSITY_LOW:
-	        	statusHeight = 19; // LOW DPI STATUS HEIGHT
-	   			break;
-	        case DisplayMetrics.DENSITY_MEDIUM:
-	       	default:
-	       		statusHeight = 25; // MEDIUM DPI STATUS HEIGHT
-	       		break;
-        }
-        ydpi = metrics.ydpi - statusHeight;
-        height = (int) ((ydpi * getResources().getDisplayMetrics().density + 0.5f)/3f);
         xdpi = metrics.xdpi * getResources().getDisplayMetrics().density + 0.5f;
-        width = (int) (xdpi/3f);
 
         
         
@@ -321,11 +295,6 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	    	speed.setBackgroundColor(Color.GRAY);
 			speed.setAlpha(.7f);
             
-	    	velText.setWidth(width);
-            ipText.setWidth(width);
-            sensorText.setWidth(width);
-            accelText.setWidth(width);
-            
 	        ipText.setText(socket.getInetAddress()
 	        		.getHostAddress());
 	        sensorText.setText("Please select a mode");
@@ -406,18 +375,18 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 					else if(event.getAction() == MotionEvent.ACTION_MOVE)
 						dy = old - event.getY();
 	        		
-					dy = (dy / (speed.getHeight() / 2) * MAX_SPEED);
+					dy = (dy / (speed.getHeight() / 2) * cave.getMaxSpeed());
 					
-					if(dy > MAX_SPEED)
-						dy = MAX_SPEED;
+					if(dy > cave.getMaxSpeed())
+						dy = cave.getMaxSpeed();
 					
-					if(dy < -MAX_SPEED)
-						dy = -MAX_SPEED;
+					if(dy < -cave.getMaxSpeed())
+						dy = -cave.getMaxSpeed();
 	        		
 	        		velocity[0] = roundDecimal(dy);
 	        		
 	        		if(dy != 0)
-	        			speed.setAlpha((Math.abs(dy)/ MAX_SPEED));
+	        			speed.setAlpha((Math.abs(dy)/ cave.getMaxSpeed()));
 	        		
 	        		if(dy > 0)
 	        			speed.setBackgroundColor(Color.GREEN);
@@ -757,6 +726,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
         	case android.R.id.home:
         		// app icon in action bar clicked; go home
         		Intent intent = new Intent(this, MainActivity.class);
+        		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         		startActivity(intent);
         		finish();
@@ -856,7 +826,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	    try{
 	    	serverAddr = InetAddress.getByName(cave.getAddress());   	
 	    	socket = new DatagramSocket();
-	    	socket.connect(new InetSocketAddress(serverAddr, port));
+	    	socket.connect(new InetSocketAddress(serverAddr, cave.getGamepadServerPort()));
 	    	if(!socket.isConnected())
 	    		throw new Exception("Couldn't open socket!");
 	    	socketOpen = true;
@@ -890,7 +860,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	}
     	try{	
     		byte[] bytes = (String.valueOf(COMMAND) + String.valueOf(tag) + " " + textStr).getBytes();
-	    	sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, port)); 
+	    	sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, cave.getGamepadServerPort())); 
     		
     		// Gets tag back confirming message sent
     		byte[] data = new byte[Integer.SIZE];
@@ -934,7 +904,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 	    	send += axis + " ";
 	    }
 	    byte[] bytes = send.getBytes();
-		sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, port));
+		sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, cave.getGamepadServerPort()));
     }
     
     /*
@@ -952,7 +922,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
     	String send = String.valueOf(NODE) + String.valueOf(tag) + " " + str + " ";
 	    byte[] bytes = new byte[send.getBytes().length];
 	    bytes = send.getBytes();
-		sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, port));
+		sendPacket(new DatagramPacket(bytes, bytes.length, serverAddr, cave.getGamepadServerPort()));
 		
     }
     
@@ -1121,6 +1091,21 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 				x = -1;
 				y = -1;
 				magnitude = distance(e);
+				
+				if(e.getPointerCount() >= FINGER_COUNT_ORIENT){
+					int tmpX = 0, tmpY = 0;
+					for(int i = 0; i < FINGER_COUNT_ORIENT; i++){
+						tmpY += e.getY(i);
+						tmpX += e.getX(i);
+					}
+				
+					tmpX /= FINGER_COUNT_ORIENT;
+					tmpY /= FINGER_COUNT_ORIENT;
+				
+					oldXP = tmpX / (double)v.getWidth();
+					oldYP = tmpY / (double)v.getHeight();
+				}
+				
 				break;
 	 		case MotionEvent.ACTION_UP:
 				break;

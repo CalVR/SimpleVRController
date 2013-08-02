@@ -18,7 +18,8 @@ import com.example.simplevrcontroller.networking.NetworkAverager.AveragedNetwork
 
 public class NetworkManager {
 	
-	public static final int DEFAULT_CAVE_PORT = 12012;
+	public static final int DEFAULT_PRESET_SERVER_PORT = 12012;
+	public static final int DEFAULT_GAMEPAD_SERVER_PORT = 8888;
 
 	private WifiManager wm;
 

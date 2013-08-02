@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin" >
+
+    <Button
+        android:id="@+id/buttonINF"
+        style="android:buttonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/buttonALL"
+        android:layout_below="@+id/buttonALL"
+        android:layout_marginTop="47dp"
+        android:background="@drawable/buttonbackground"
+        android:minWidth="220dip"
+        android:text="@string/inflamation" />
+
+    <Button
+        android:id="@+id/buttonINFSYM"
+        style="android:buttonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/buttonINF"
+        android:layout_below="@+id/buttonINF"
+        android:layout_marginTop="56dp"
+        android:background="@drawable/buttonbackground"
+        android:minWidth="220dip"
+        android:text="@string/infsym" />
+
+    <Button
+        android:id="@+id/buttonGP"
+        style="android:buttonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/buttonINFSYM"
+        android:layout_below="@+id/buttonINFSYM"
+        android:layout_marginTop="70dp"
+        android:background="@drawable/buttonbackground"
+        android:minWidth="220dip"
+        android:text="@string/gamepad" />
+
+    <Button
+        android:id="@+id/ButtonTOP200"
+        style="android:buttonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonINFSYM"
+        android:layout_alignLeft="@+id/buttonHEALTHY"
+        android:background="@drawable/buttonbackground"
+        android:minWidth="220dip"
+        android:text="@string/top200" />
+
+    <Button
+        android:id="@+id/ButtonCOMP"
+        style="android:buttonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonGP"
+        android:layout_alignLeft="@+id/ButtonTOP200"
+        android:background="@drawable/buttonbackground"
+        android:minWidth="220dip"
+        android:text="@string/comparePat" />
+
+    <Button
+        android:id="@+id/ButtonTIME"
+        style="android:buttonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/buttonGP"
+        android:layout_alignBottom="@+id/buttonGP"
+        android:layout_alignLeft="@+id/ButtonCOMP"
+        android:background="@drawable/buttonbackground"
+        android:minWidth="220dip"
+        android:text="@string/timeComp" />
+
+    <Button
+        android:id="@+id/buttonALL"
+        style="android:buttonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="66dp"
+        android:layout_marginTop="127dp"
+        android:background="@drawable/buttonbackground"
+        android:hint="@string/test"
+        android:minWidth="220dip"
+        android:text="@string/all" />
+
+    <Button
+        android:id="@+id/buttonHEALTHY"
+        style="android:buttonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonINF"
+        android:layout_marginLeft="59dp"
+        android:layout_toRightOf="@+id/buttonINFSYM"
+        android:background="@drawable/buttonbackground"
+        android:minWidth="220dip"
+        android:text="@string/healthy" />
+
+    <Spinner
+        android:id="@+id/Hosts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/buttonALL"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="110dp"
+        android:layout_marginTop="31dp"
+        android:layout_toLeftOf="@+id/ButtonTOP200" />
+
+    <ScrollView
+        android:id="@+id/tscroller"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/ButtonTIME"
+        android:layout_alignTop="@+id/buttonHEALTHY"
+        android:layout_marginLeft="85dp"
+        android:layout_toRightOf="@+id/ButtonCOMP"
+        android:fillViewport="true"
+        android:scrollbars="vertical" >
+
+        <TextView
+            android:id="@+id/log"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#333300" />
+    </ScrollView>
+
+    <Button
+        android:id="@+id/connect"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tscroller"
+        android:layout_alignTop="@+id/Hosts"
+        android:text="@string/reconnect" />
+
+</RelativeLayout>
