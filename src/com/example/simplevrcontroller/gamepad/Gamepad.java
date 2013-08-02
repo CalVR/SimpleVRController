@@ -1071,7 +1071,7 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 				if(oldOrient == Double.POSITIVE_INFINITY)
 					oldOrient = resultingAngles[0];
 				
-				Double[] orientation = {resultingAngles[0] - oldOrient};
+				Double[] orientation = {oldOrient - resultingAngles[0]};
 				sendSocketDoubles(ORIENT, orientation, 1, NAVI);
 			}
 		}
