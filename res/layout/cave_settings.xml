@@ -23,8 +23,7 @@
         android:layout_marginTop="49dp"
         android:max="1000"
         android:maxWidth="150dp"
-        android:minWidth="50dp"
-    	android:background="#FFFFFF" />
+        android:minWidth="50dp" />
 
     <TextView
         android:id="@+id/speed_text"

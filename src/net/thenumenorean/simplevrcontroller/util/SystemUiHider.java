@@ -1,4 +1,4 @@
-package com.example.simplevrcontroller.util;
+package net.thenumenorean.simplevrcontroller.util;
 
 import android.app.Activity;
 import android.os.Build;

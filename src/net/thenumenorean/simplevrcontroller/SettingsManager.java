@@ -1,10 +1,11 @@
-package com.example.simplevrcontroller;
+package net.thenumenorean.simplevrcontroller;
 
+import net.thenumenorean.simplevrcontroller.cave.Cave;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-import com.example.simplevrcontroller.cave.Cave;
+import com.example.simplevrcontroller.R;
 
 public class SettingsManager {
 	

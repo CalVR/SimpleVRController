@@ -1,12 +1,13 @@
-package com.example.simplevrcontroller.networking.location;
+package net.thenumenorean.simplevrcontroller.networking.location;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import com.example.simplevrcontroller.cave.Cave;
-import com.example.simplevrcontroller.cave.CaveManager;
-import com.example.simplevrcontroller.networking.NetworkManager;
+
+import net.thenumenorean.simplevrcontroller.cave.Cave;
+import net.thenumenorean.simplevrcontroller.cave.CaveManager;
+import net.thenumenorean.simplevrcontroller.networking.NetworkManager;
 
 public class WirelessLocator {
 	

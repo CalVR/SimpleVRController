@@ -1,4 +1,4 @@
-package com.example.simplevrcontroller.networking;
+package net.thenumenorean.simplevrcontroller.networking;
 
 import java.util.ArrayList;
 import java.util.Collections;

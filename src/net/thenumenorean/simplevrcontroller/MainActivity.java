@@ -1,17 +1,19 @@
-package com.example.simplevrcontroller;
+package net.thenumenorean.simplevrcontroller;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.List;
 
-import com.example.simplevrcontroller.cave.Cave;
-import com.example.simplevrcontroller.cave.CaveManager;
-import com.example.simplevrcontroller.gamepad.Gamepad;
-import com.example.simplevrcontroller.networking.NetworkManager;
-import com.example.simplevrcontroller.networking.location.WirelessLocation;
-import com.example.simplevrcontroller.networking.location.WirelessLocation.AccuracyThreshold;
-import com.example.simplevrcontroller.networking.location.WirelessLocator;
+import net.thenumenorean.simplevrcontroller.cave.Cave;
+import net.thenumenorean.simplevrcontroller.cave.CaveManager;
+import net.thenumenorean.simplevrcontroller.gamepad.Gamepad;
+import net.thenumenorean.simplevrcontroller.networking.NetworkManager;
+import net.thenumenorean.simplevrcontroller.networking.location.WirelessLocation;
+import net.thenumenorean.simplevrcontroller.networking.location.WirelessLocator;
+import net.thenumenorean.simplevrcontroller.networking.location.WirelessLocation.AccuracyThreshold;
+
+import com.example.simplevrcontroller.R;
 
 import android.app.Activity;
 import android.content.Intent;

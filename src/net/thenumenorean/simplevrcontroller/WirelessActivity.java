@@ -1,7 +1,14 @@
-package com.example.simplevrcontroller;
+package net.thenumenorean.simplevrcontroller;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import net.thenumenorean.simplevrcontroller.cave.Cave;
+import net.thenumenorean.simplevrcontroller.cave.CaveManager;
+import net.thenumenorean.simplevrcontroller.networking.NetworkManager;
+import net.thenumenorean.simplevrcontroller.networking.NetworkAverager.AveragedNetworkInfo;
+import net.thenumenorean.simplevrcontroller.networking.location.WirelessLocation;
+import net.thenumenorean.simplevrcontroller.networking.location.WirelessLocator;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -22,12 +29,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.example.simplevrcontroller.cave.Cave;
-import com.example.simplevrcontroller.cave.CaveManager;
-import com.example.simplevrcontroller.networking.NetworkAverager.AveragedNetworkInfo;
-import com.example.simplevrcontroller.networking.NetworkManager;
-import com.example.simplevrcontroller.networking.location.WirelessLocation;
-import com.example.simplevrcontroller.networking.location.WirelessLocator;
+import com.example.simplevrcontroller.R;
 
 public class WirelessActivity extends Activity {
 

@@ -1,4 +1,4 @@
-package com.example.simplevrcontroller.tools;
+package net.thenumenorean.simplevrcontroller.tools;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,9 @@
-package com.example.simplevrcontroller.networking;
+package net.thenumenorean.simplevrcontroller.networking;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import net.thenumenorean.simplevrcontroller.networking.NetworkAverager.AveragedNetworkInfo;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -14,7 +16,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 
-import com.example.simplevrcontroller.networking.NetworkAverager.AveragedNetworkInfo;
 
 public class NetworkManager {
 	

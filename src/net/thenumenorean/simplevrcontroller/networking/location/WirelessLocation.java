@@ -1,17 +1,18 @@
-package com.example.simplevrcontroller.networking.location;
+package net.thenumenorean.simplevrcontroller.networking.location;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+
+import net.thenumenorean.simplevrcontroller.cave.Cave;
+import net.thenumenorean.simplevrcontroller.networking.NetworkManager;
+import net.thenumenorean.simplevrcontroller.networking.NetworkAverager.AveragedNetworkInfo;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import android.net.wifi.ScanResult;
 
-import com.example.simplevrcontroller.cave.Cave;
-import com.example.simplevrcontroller.networking.NetworkAverager.AveragedNetworkInfo;
-import com.example.simplevrcontroller.networking.NetworkManager;
 
 public class WirelessLocation {
 	

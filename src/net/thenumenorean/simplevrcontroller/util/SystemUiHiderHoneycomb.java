@@ -1,4 +1,4 @@
-package com.example.simplevrcontroller.util;
+package net.thenumenorean.simplevrcontroller.util;
 
 import android.annotation.TargetApi;
 import android.app.Activity;

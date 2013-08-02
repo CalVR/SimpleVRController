@@ -1,4 +1,4 @@
-package com.example.simplevrcontroller.cave;
+package net.thenumenorean.simplevrcontroller.cave;
 
 import java.io.IOException;
 import java.io.InputStream;

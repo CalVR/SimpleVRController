@@ -1,4 +1,4 @@
-package com.example.simplevrcontroller.gamepad;
+package net.thenumenorean.simplevrcontroller.gamepad;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -14,6 +14,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import net.thenumenorean.simplevrcontroller.MainActivity;
+import net.thenumenorean.simplevrcontroller.cave.Cave;
+import net.thenumenorean.simplevrcontroller.cave.CaveManager;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -47,10 +51,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.simplevrcontroller.MainActivity;
 import com.example.simplevrcontroller.R;
-import com.example.simplevrcontroller.cave.Cave;
-import com.example.simplevrcontroller.cave.CaveManager;
 
 // 
 public class Gamepad extends Activity implements OnTouchListener, SensorEventListener{
@@ -935,7 +936,8 @@ public class Gamepad extends Activity implements OnTouchListener, SensorEventLis
 					socket.send(p);
 				} catch (IOException e) {
 					
-					Toast.makeText(Gamepad.this, "IOException in Sending! " + e.getMessage(), Toast.LENGTH_SHORT).show();   
+					//TODO: Fix
+					//Toast.makeText(Gamepad.this, "IOException in Sending! " + e.getMessage(), Toast.LENGTH_SHORT).show();   
 	        		Log.w(LOG_TAG, "IOException Sending: " + e.getMessage());
 					e.printStackTrace();
 				}

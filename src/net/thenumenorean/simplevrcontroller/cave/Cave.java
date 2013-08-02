@@ -1,11 +1,12 @@
-package com.example.simplevrcontroller.cave;
+package net.thenumenorean.simplevrcontroller.cave;
+
+import net.thenumenorean.simplevrcontroller.SettingsManager;
+import net.thenumenorean.simplevrcontroller.networking.NetworkManager;
+import net.thenumenorean.simplevrcontroller.networking.location.WirelessLocation;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.example.simplevrcontroller.SettingsManager;
-import com.example.simplevrcontroller.networking.NetworkManager;
-import com.example.simplevrcontroller.networking.location.WirelessLocation;
 
 public class Cave {
 

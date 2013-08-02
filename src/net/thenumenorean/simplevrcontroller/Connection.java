@@ -1,4 +1,4 @@
-package com.example.simplevrcontroller;
+package net.thenumenorean.simplevrcontroller;
 
 import java.io.IOException;
 import java.net.Socket;

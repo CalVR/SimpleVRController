@@ -1,4 +1,4 @@
-package com.example.simplevrcontroller.tools;
+package net.thenumenorean.simplevrcontroller.tools;
 
 public class Levenshtein {
 	private String compOne;

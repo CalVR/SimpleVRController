@@ -20,7 +20,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.example.simplevrcontroller.MainActivity"
+            android:name="net.thenumenorean.simplevrcontroller.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,17 +29,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.simplevrcontroller.WirelessActivity"
+            android:name="net.thenumenorean.simplevrcontroller.WirelessActivity"
             android:label="@string/title_activity_wireless" >
         </activity>
         <activity
-            android:name="com.example.simplevrcontroller.GamepadActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_gamepad"
-            android:theme="@style/FullscreenTheme" >
-        </activity>
-        <activity
-            android:name="com.example.simplevrcontroller.gamepad.Gamepad"
+        	android:name="net.thenumenorean.simplevrcontroller.gamepad.Gamepad"
             android:label="@string/title_activity_gamepad">
         </activity>
     </application>
