@@ -9,12 +9,21 @@ import net.thenumenorean.simplevrcontroller.cave.Cave;
 import net.thenumenorean.simplevrcontroller.cave.CaveManager;
 import net.thenumenorean.simplevrcontroller.networking.NetworkManager;
 
+/**
+ * Class for getting the current location
+ * @author fmacagno
+ *
+ */
 public class WirelessLocator {
 	
 	private NetworkManager net;
 	
 	public static final int WIRELESS_THRESHOLD = -75;
 	
+	/**
+	 * Creates a new WirelessLocator that uses the given NetworkManager for data
+	 * @param net NetworkManager to use
+	 */
 	public WirelessLocator(NetworkManager net){
 		
 		this.net = net;

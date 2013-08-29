@@ -1,5 +1,10 @@
 package net.thenumenorean.simplevrcontroller.tools;
 
+/**
+ * If you ever wanted to compare strings using the Levenshtein distance, this is for you
+ * @author fmacagno
+ *
+ */
 public class Levenshtein {
 	private String compOne;
 	private String compTwo;
@@ -60,6 +65,7 @@ public class Levenshtein {
 		//displayMatrix();
 	}
 
+	@SuppressWarnings("unused")
 	private void displayMatrix() {
 		System.out.println(" " + compOne);
 		for (int y = 0; y <= compTwo.length(); y++) {

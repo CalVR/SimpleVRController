@@ -17,7 +17,11 @@ public class NetworkAverager {
 		networks = new ArrayList<AveragedNetworkInfo>();
 	}
 	
-	public void calculateAverages(ArrayList<ScanResult> scans){
+	/**
+	 * Calculates the averagaes again based on the new data which is given. (See source for algorithm)
+	 * @param scans A list of scans to add
+	 */
+	public void calculateAverages(List<ScanResult> scans){
 		for(ScanResult s : scans){
 			
 			boolean added = false;
@@ -63,15 +67,30 @@ public class NetworkAverager {
 		networks.removeAll(tmp);
 	}
 	
+	/**
+	 * Helper class that contains data about a single Network and averages it over time.
+	 * @author fmacagno
+	 *
+	 */
 	public class AveragedNetworkInfo implements Comparable<AveragedNetworkInfo> {
 		
 		public final String bssid;
 		public final String ssid;
 		private List<Integer> nums;
+		
+		
+	//System.out.println();
 		private int store;
 		public boolean just_updated;
 		public int missing_streak;
 
+		/**
+		 * Creates a new instance with the given identifiers. It will then keep track of the last <storage> 
+		 * values and average them
+		 * @param ssid
+		 * @param bssid
+		 * @param storage
+		 */
 		public AveragedNetworkInfo(String ssid, String bssid, int storage) {
 			this.ssid = ssid;
 			this.bssid = bssid;
@@ -83,11 +102,21 @@ public class NetworkAverager {
 			
 			missing_streak = 0;
 		}
+		
+		
+	//System.out.println();
 
+		/**
+		 * Adds a signal strength to the averaging process
+		 * @param num
+		 */
 		public void addNumber(int num){
 			
 			if(num == Integer.MIN_VALUE){
+
 				
+				
+				//System.out.println();
 				missing_streak++;
 				
 			} else {
@@ -103,6 +132,10 @@ public class NetworkAverager {
 			just_updated = true;
 		}
 
+		/**
+		 * Gets the averaged signal strength value
+		 * @return An integer
+		 */
 		public int getAveragedLevel() {
 			
 			int total = 0;
@@ -111,10 +144,10 @@ public class NetworkAverager {
 				for(Integer i : nums){
 					total += i;
 				}
-			}
 				
 			
 			//System.out.println();
+			}
 			
 			return total / nums.size();
 		}
@@ -126,6 +159,10 @@ public class NetworkAverager {
 
 	}
 
+	/**
+	 * Returns a clone of the current list of Averages for the networks
+	 * @return A list, potentially empty
+	 */
 	public List<AveragedNetworkInfo> getAverages() {
 		return (List<AveragedNetworkInfo>) networks.clone();
 	}

@@ -13,10 +13,14 @@ import org.w3c.dom.NodeList;
 
 import android.net.wifi.ScanResult;
 
-
+/**
+ * Stores data for a specific location
+ * @author fmacagno
+ *
+ */
 public class WirelessLocation {
 	
-	public static final char COLON_PLACEHOLDER = '_';
+	public static final int READING_AMT = 20;
 	
 	public enum AccuracyThreshold {
 		STRONG(.75, 300),
@@ -40,12 +44,20 @@ public class WirelessLocation {
 	private Cave cave;
 	private AccuracyThreshold lastLocate;
 
+	/**
+	 * Creates a new WirelessLocation with the given name.
+	 * @param name Name for the location
+	 */
 	public WirelessLocation(String name){
 		this.name = name;
 		
 		bssids = new TreeMap<String, Integer>();
 	}
 	
+	/**
+	 * Creates a new WirelessLocation using data loaded from the given xml element
+	 * @param n
+	 */
 	public WirelessLocation(Element n) {
 		
 		bssids = new TreeMap<String, Integer>();
@@ -63,10 +75,14 @@ public class WirelessLocation {
 		
 	}
 
+	/**
+	 * Sets this location to be the current position in space
+	 * @param networker The Networker to use to get the data
+	 */
 	public void setLocation(NetworkManager networker){
 		bssids.clear();
 		
-		for(int y = 0; y < 20; y++){
+		for(int y = 0; y < READING_AMT; y++){
 			ArrayList<ScanResult> nets = networker.getFreshOrderedNetworks(WirelessLocator.WIRELESS_THRESHOLD);
 			
 			for(ScanResult res : nets){
@@ -82,7 +98,10 @@ public class WirelessLocation {
 	
 	/**
 	 * Returns true if the current location matches this WirelessLocation
-	 * @return
+	 * 
+	 * This is where you want to meddle to improve wireless locating.
+	 * 
+	 * @return I think its obvious
 	 */
 	public AccuracyThreshold checkLocation(NetworkManager networker){
 		
@@ -131,6 +150,10 @@ public class WirelessLocation {
 		return null;
 	}
 	
+	/**
+	 * Gets what the threshold was of the last successful locate
+	 * @return
+	 */
 	public AccuracyThreshold getLastLocateThreashold(){
 		return lastLocate;
 	}
@@ -144,25 +167,37 @@ public class WirelessLocation {
 		return bssids.containsKey(bssid);
 	}
 	
+	/**
+	 * Writes the data in this WirelessLocation to the given element
+	 * @param e Element to write to
+	 */
 	public void writeToElement(Element e) {
 		
 		for(String s : bssids.keySet()){
 			Element a = e.getOwnerDocument().createElement("network");
-			String mod = s.replace(':', COLON_PLACEHOLDER);
 			a.setAttribute("bssid", s);
 			a.setAttribute("strength", bssids.get(s).toString());
 			e.appendChild(a);
 		}
 	}
 
+	/**
+	 * Gets the name for this WirelessLocation
+	 * @return The name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Sets the name for this location
+	 * @param name The name to set it to
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
+	public static final char COLON_PLACEHOLDER = '_';
 	/**
 	 * Gets the strength of the last successful locate
 	 * @return A String or null if there is no recent successful locate

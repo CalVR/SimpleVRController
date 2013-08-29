@@ -63,7 +63,6 @@ public class NetworkManager {
 					try {
 						Thread.sleep(200);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -73,10 +72,19 @@ public class NetworkManager {
 		
 	}
 	
+	/**
+	 * Gets all the averages for the networks (helper method, returns result from NetworkAverager)
+	 * @return A list 
+	 */
 	public List<AveragedNetworkInfo> getNetworkAverages(){
 		return averager.getAverages();
 	}
 
+	/**
+	 * Gets all the network averages that have an average above a certain threshold
+	 * @param thresh The threshold to use
+	 * @return A list
+	 */
 	public List<AveragedNetworkInfo> getNetworkAverages(int thresh) {
 		
 		List<AveragedNetworkInfo> newList = new ArrayList<AveragedNetworkInfo>(), av = getNetworkAverages();
@@ -90,10 +98,19 @@ public class NetworkManager {
 
 	}
 
+	/**
+	 * Gets the last set of received data, ordered with the best signal first
+	 * @return A potentially empty list
+	 */
 	public ArrayList<ScanResult> getOrderedNetworks() {
 		return orderedNetworks;
 	}
 
+	/**
+	 * Same as getOrderedNetworks(), but only returns values above the given value.
+	 * @param thresh The threshold for the cutof point
+	 * @return A potentially empty list
+	 */
 	public ArrayList<ScanResult> getOrderedNetworks(int thresh) {
 
 		ArrayList<ScanResult> newOrdered = new ArrayList<ScanResult>();
@@ -105,6 +122,10 @@ public class NetworkManager {
 
 	}
 
+	/**
+	 * Waits until a new set of network data is availible then returns it
+	 * @return A potentially empty List
+	 */
 	public ArrayList<ScanResult> getFreshOrderedNetworks() {
 		try {
 			synchronized(this){
@@ -116,13 +137,18 @@ public class NetworkManager {
 		return orderedNetworks;
 	}
 
+	/**
+	 * Same as getFreshorderedNetworks(), but only returns them that have signal above the given
+	 * threshold
+	 * @param thresh The cutoff point
+	 * @return A potentially empty list
+	 */
 	public ArrayList<ScanResult> getFreshOrderedNetworks(int thresh) {
 		try {
 			synchronized(this){
 				this.wait();
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return getOrderedNetworks(thresh);
@@ -161,6 +187,10 @@ public class NetworkManager {
 		activity.unregisterReceiver(br);
 	}
 	
+	/**
+	 * Gets the Wifimanager this NetworkManager uses to get data.
+	 * @return A Wifimanager
+	 */
 	public WifiManager getWifiManager() {
 		return wm;
 	}
