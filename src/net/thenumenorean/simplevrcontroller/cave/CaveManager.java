@@ -34,6 +34,11 @@ public class CaveManager {
 
 	}
 
+	/**
+	 * Returns the Cave with the given name.
+	 * @param name Name of the cave to get
+	 * @return A Cave if one exists with the given name, or null
+	 */
 	public Cave getCave(String name) {
 		for (Cave c : caves)
 			if (c.getName().equals(name))
@@ -42,10 +47,10 @@ public class CaveManager {
 	}
 
 	/**
-	 * Trys to add the given cave to the manager.
+	 * Trys to add the given cave to the manager. There can be no duplicate caves.
 	 * 
-	 * @param cave
-	 * @return
+	 * @param cave The Cave to add
+	 * @return True if it was added, false otherwise
 	 */
 	public boolean addCave(Cave cave) {
 		if (caves.contains(cave))
@@ -56,6 +61,11 @@ public class CaveManager {
 		return true;
 	}
 
+	/**
+	 * Saves the Cave data as an xml file to the given OutputStream
+	 * @param os OutputStream to write to
+	 * @throws TransformerException If the xml cant be built
+	 */
 	public void save(OutputStream os) throws TransformerException {
 
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory
@@ -91,7 +101,14 @@ public class CaveManager {
 		System.out.println("Saved data.");
 
 	}
-
+	
+	/**
+	 * Loads Cave data from the given input stream, which should feed from 
+	 * @param is The inputStream to load from
+	 * @throws ParserConfigurationException If it couldn't parse the xml
+	 * @throws SAXException If there is an error with the xml
+	 * @throws IOException If there is an exceptionloading the file
+	 */
 	public void load(InputStream is) throws ParserConfigurationException,
 			SAXException, IOException {
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory
@@ -106,10 +123,18 @@ public class CaveManager {
 		}
 	}
 	
+	/**
+	 * Gets a list of all the availible Caves
+	 * @return
+	 */
 	public ArrayList<Cave> getCaves(){
 		return caves;
 	}
-
+	
+	/**
+	 * Gets the current instance of the CaveManager
+	 * @return A cavemanager instance
+	 */
 	public static CaveManager getCaveManager() {
 		return manager;
 	}
